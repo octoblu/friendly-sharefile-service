@@ -3,22 +3,37 @@ debug   = require('debug')('sharefile-service:serice')
 request = require 'request'
 
 class SharefileService
-  constructor: ({@sharefileUri,@domain,@token}) ->
+  constructor: ({@sharefileDomain,@token}) ->
 
   metadata: ({name,itemId}, callback) =>
-    options =
-      baseUrl: @sharefileUri
-      uri: "/Metadata(name=#{name},itemid=#{itemId})"
-      json: true
-      auth:
-        bearer: @token
+    options = @_getRequestOptions()
+    options.uri = "/Metadata(name=#{name},itemid=#{itemId})"
 
     debug 'request options', options
     request.get options, (error, response, body) =>
       debug 'request result', error, response?.statusCode, body
       return callback @_createError 500, error.message if error?
-      return callback @_createError response.statusCode, body?.message?.value unless response.statusCode == 201
+      return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
       callback null, code: response.statusCode, body: body
+
+  files: ({itemId}, callback) =>
+    options = @_getRequestOptions()
+    options.uri = "/Items(id=#{itemId})"
+
+    debug 'request options', options
+    request.get options, (error, response, body) =>
+      debug 'request result', error, response?.statusCode, body
+      return callback @_createError 500, error.message if error?
+      return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
+      callback null, code: response.statusCode, body: body
+
+  _getRequestOptions: =>
+    return {
+      baseUrl: "https://#{@sharefileDomain}.sf-api.com/sf/v3/"
+      json: true
+      auth:
+        bearer: @token
+    }
 
   _createError: (code, message) =>
     error = new Error message

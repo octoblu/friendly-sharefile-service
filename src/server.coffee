@@ -28,9 +28,9 @@ class Server
     app.use bearerToken()
 
     app.use (request, response, next) =>
-      request.domain = request.header 'X-SHAREFILE-DOMAIN'
-      unless request.domain?
-        return response.status(422).send error: 'Missing X-SHAREFILE-DOMAIN header'
+      sharefileDomain = request.header 'X-SHAREFILE-DOMAIN'
+      return response.status(422).send error: 'Missing X-SHAREFILE-DOMAIN header' unless sharefileDomain?
+      request.sharefileDomain = sharefileDomain
       next()
 
     app.options '*', cors()
