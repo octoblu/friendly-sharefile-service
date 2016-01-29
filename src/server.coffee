@@ -10,13 +10,9 @@ MeshbluConfig      = require 'meshblu-config'
 bearerToken        = require 'express-bearer-token'
 debug              = require('debug')('sharefile-service:server')
 Router             = require './router'
-SharefileService   = require './services/sharefile-service'
 
 class Server
-  constructor: (options)->
-    {@meshbluConfig} = options
-    {@disableLogging, @port} = options
-    {@sharefileUri} = options
+  constructor: ({@disableLogging, @port},{@sharefileUri})->
 
   address: =>
     @server.address()
@@ -30,13 +26,16 @@ class Server
     app.use bodyParser.urlencoded limit: '1mb', extended : true
     app.use bodyParser.json limit : '1mb'
     app.use bearerToken()
-    app.use (request, response) ->
-      response.send "Token #{request.token}" 
+
+    app.use (request, response, next) =>
+      request.domain = request.header 'X-SHAREFILE-DOMAIN'
+      unless request.domain?
+        return response.status(422).send error: 'Missing X-SHAREFILE-DOMAIN header'
+      next()
 
     app.options '*', cors()
 
-    sharefileService = new SharefileService {@meshbluConfig, @sharefileUri}
-    router = new Router {@meshbluConfig, sharefileService}
+    router = new Router {@sharefileUri}
 
     router.route app
 

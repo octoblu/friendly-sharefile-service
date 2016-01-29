@@ -1,25 +1,24 @@
-debug   = require 'debug'
+_       = require 'lodash'
+debug   = require('debug')('sharefile-service:serice')
 request = require 'request'
 
 class SharefileService
-  constructor: ({@sharefileUri}) ->
+  constructor: ({@sharefileUri,@domain,@token}) ->
 
-  doShare: ({}, callback) =>
-
-  metadata: (token, callback) =>
+  metadata: ({name,itemId}, callback) =>
     options =
-      uri: "#{@sharefileUri}/sf/v3/Shares"
+      baseUrl: @sharefileUri
+      uri: "/Metadata(name=#{name},itemid=#{itemId})"
+      json: true
       auth:
-        bearer: token
+        bearer: @token
 
-    debug 'request.post', options
-    request.post options, (error, response, body) =>
-      debug 'request.post result', error, response?.statusCode, body
-      debug 'request.post result', error, response?.statusCode, body
-      return callback error if error?
-      return callback new Error "Error" unless response.statusCode == 201
-      callback null
-
+    debug 'request options', options
+    request.get options, (error, response, body) =>
+      debug 'request result', error, response?.statusCode, body
+      return callback @_createError 500, error.message if error?
+      return callback @_createError response.statusCode, body?.message?.value unless response.statusCode == 201
+      callback null, code: response.statusCode, body: body
 
   _createError: (code, message) =>
     error = new Error message

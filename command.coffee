@@ -1,24 +1,22 @@
 _             = require 'lodash'
-MeshbluConfig = require 'meshblu-config'
 Server        = require './src/server'
 
 class Command
   constructor: ->
     @serverOptions =
-      meshbluConfig        : new MeshbluConfig().toJSON()
       port                 : process.env.PORT || 80
       disableLogging       : process.env.DISABLE_LOGGING == "true"
-      sharefileUri         : process.env.SHAREFILE_URI || 'https://octoblu.sf-api.com/sf/v3'
+
+    @sharefileUri = process.env.SHAREFILE_URI
 
   panic: (error) =>
     console.error error.stack
     process.exit 1
 
   run: =>
-    @panic new Error('Missing required environment variable: MESHBLU_CONFIG') if _.isEmpty @serverOptions.meshbluConfig
-    @panic new Error('Missing required environment variable: SHAREFILE_URI') if _.isEmpty @serverOptions.sharefileUri
+    @panic new Error('Missing required environment variable: SHAREFILE_URI') if _.isEmpty @sharefileUri
 
-    server = new Server @serverOptions
+    server = new Server @serverOptions, {@sharefileUri}
     server.run (error) =>
       return @panic error if error?
 
