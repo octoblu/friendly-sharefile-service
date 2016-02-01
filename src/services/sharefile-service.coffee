@@ -1,5 +1,5 @@
 _       = require 'lodash'
-debug   = require('debug')('sharefile-service:serice')
+debug   = require('debug')('sharefile-service:service')
 request = require 'request'
 
 class SharefileService
@@ -26,6 +26,57 @@ class SharefileService
       return callback @_createError 500, error.message if error?
       return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
       callback null, code: response.statusCode, body: body
+
+
+  share: (body, callback) =>
+    defaultBody =
+      ShareType: 'Send'
+      RequireLogin: false
+      RequireUserInfo: false
+      MaxDownloads: -1
+      UsesStreamIDs: false
+    body = _.defaults body, defaultBody
+
+    return callback @_createError 422, "Missing Title" unless body.Title?
+    return callback @_createError 422, "Missing Items" unless body.Items?
+    return callback @_createError 422, "Missing Recipients" unless body.Recipients?
+    return callback @_createError 422, "Missing ExpirationDate" unless body.ExpirationDate?
+
+    options = @_getRequestOptions()
+    options.uri = "/Shares"
+    options.qs =
+      notify: false
+    options.json = body
+
+    debug 'request options', options
+    request.post options, (error, response, body) =>
+      debug 'request result', error, response?.statusCode, body
+      return callback @_createError 500, error.message if error?
+      return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
+      callback null, code: response.statusCode, body: body
+
+  list: (body, callback) =>
+    options = @_getRequestOptions()
+    options.uri = '/Items'
+
+    #Get HomeFolder for Current User
+    request.get options, (error, response, body) =>
+      debug 'HomeFolder Id', body.Id
+      {id} = body
+
+      #Get Children
+      childrenOptions= @_getRequestOptions()
+      childrenOptions.uri = "/Items(id=#{id})/Children"
+
+      request.get childrenOptions, (error, response, body) =>
+        debug 'children result', error, response?.statusCode, body
+        return callback @_createError 500, error.message if error?
+        return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
+        callback null, code: response.statusCode, body: body
+
+      debug 'HomeFolder result', error, response?.statusCode, body
+      return callback @_createError 500, error.message if error?
+      return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
 
   _getRequestOptions: =>
     return {

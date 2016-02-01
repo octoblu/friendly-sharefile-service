@@ -5,7 +5,7 @@ class Router
   route: (app) =>
     sharefileController = new SharefileController {@sharefileUri}
 
-    #app.post '/share', sharefileController.share
+    app.post '/share', sharefileController.share
 
     # app.post '/upload/:itemId', sharefileController.upload
     # app.get '/download/:itemId', sharefileController.download
@@ -16,5 +16,8 @@ class Router
     # app.get '/change/:itemId', sharefileController.change
 
     app.get '/files/:itemId', sharefileController.files
+    app.post '/folders', sharefileController.list
+
+
 
 module.exports = Router
