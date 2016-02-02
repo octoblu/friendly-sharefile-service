@@ -1,9 +1,8 @@
 SharefileController = require './controllers/sharefile-controller'
 
 class Router
-  constructor: ({@sharefileUri}) ->
   route: (app) =>
-    sharefileController = new SharefileController {@sharefileUri}
+    sharefileController = new SharefileController {}
 
     app.post '/share', sharefileController.share
 
