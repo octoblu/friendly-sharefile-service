@@ -14,7 +14,7 @@ class SharefileService
       debug 'request result', error, response?.statusCode, body
       return callback @_createError 500, error.message if error?
       return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
-      callback null, code: response.statusCode, body: body
+      callback null, @_createResponse response, body
 
   files: ({itemId}, callback) =>
     options = @_getRequestOptions()
@@ -25,8 +25,7 @@ class SharefileService
       debug 'request result', error, response?.statusCode, body
       return callback @_createError 500, error.message if error?
       return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
-      callback null, code: response.statusCode, body: body
-
+      callback null, @_createResponse response, body
 
   share: (body, callback) =>
     defaultBody =
@@ -53,7 +52,7 @@ class SharefileService
       debug 'request result', error, response?.statusCode, body
       return callback @_createError 500, error.message if error?
       return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
-      callback null, code: response.statusCode, body: body
+      callback null, @_createResponse response, body
 
   list: (body, callback) =>
     options = @_getRequestOptions()
@@ -61,22 +60,22 @@ class SharefileService
 
     #Get HomeFolder for Current User
     request.get options, (error, response, body) =>
+      debug 'HomeFolder result', error, response?.statusCode, body
+      return callback @_createError 500, error.message if error?
+      return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
+
       debug 'HomeFolder Id', body.Id
-      {id} = body
+      {Id} = body
 
       #Get Children
-      childrenOptions= @_getRequestOptions()
-      childrenOptions.uri = "/Items(id=#{id})/Children"
+      childrenOptions = @_getRequestOptions()
+      childrenOptions.uri = "/Items(id=#{Id})/Children"
 
       request.get childrenOptions, (error, response, body) =>
         debug 'children result', error, response?.statusCode, body
         return callback @_createError 500, error.message if error?
         return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
-        callback null, code: response.statusCode, body: body
-
-      debug 'HomeFolder result', error, response?.statusCode, body
-      return callback @_createError 500, error.message if error?
-      return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
+        callback null, @_createResponse response, body
 
   _getRequestOptions: =>
     return {
@@ -85,6 +84,9 @@ class SharefileService
       auth:
         bearer: @token
     }
+
+  _createResponse: (response, body) =>
+    return code: response.statusCode, body: body
 
   _createError: (code, message) =>
     error = new Error message

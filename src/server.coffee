@@ -6,7 +6,6 @@ errorHandler       = require 'errorhandler'
 meshbluHealthcheck = require 'express-meshblu-healthcheck'
 meshbluAuth        = require 'express-meshblu-auth'
 MeshbluAuthExpress = require 'express-meshblu-auth/src/meshblu-auth-express'
-MeshbluConfig      = require 'meshblu-config'
 bearerToken        = require 'express-bearer-token'
 debug              = require('debug')('sharefile-service:server')
 Router             = require './router'
