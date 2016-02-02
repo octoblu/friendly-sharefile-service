@@ -2,8 +2,8 @@ SharefileService   = require '../services/sharefile-service'
 
 class SharefileController
   metadata: (request, response) =>
-    {name,itemId} = request.params
-    @_getShareFileService(request).metadata {name,itemId}, (error, result) =>
+    {itemId} = request.params
+    @_getShareFileService(request).metadata {itemId}, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 

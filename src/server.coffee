@@ -11,7 +11,7 @@ debug              = require('debug')('sharefile-service:server')
 Router             = require './router'
 
 class Server
-  constructor: ({@disableLogging, @port})->
+  constructor: ({@disableLogging, @port}, {})->
 
   address: =>
     @server.address()
@@ -34,7 +34,7 @@ class Server
 
     app.options '*', cors()
 
-    router = new Router {@sharefileUri}
+    router = new Router {}
 
     router.route app
 

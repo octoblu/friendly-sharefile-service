@@ -5,9 +5,9 @@ request = require 'request'
 class SharefileService
   constructor: ({@sharefileDomain,@token}) ->
 
-  metadata: ({name,itemId}, callback) =>
+  metadata: ({itemId}, callback) =>
     options = @_getRequestOptions()
-    options.uri = "/Metadata(name=#{name},itemid=#{itemId})"
+    options.uri = "/Items(#{itemId})/Metadata"
 
     debug 'request options', options
     request.get options, (error, response, body) =>

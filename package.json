@@ -1,6 +1,6 @@
 {
   "name": "sharefile-service",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "Put some description here",
   "keywords": [],
   "homepage": "https://github.com/octoblu/sharefile-service",
@@ -18,6 +18,10 @@
     "start": "node command.js",
     "test": "istanbul cover _mocha -- -R spec --require coffee-coverage/register-istanbul"
   },
+  "bin": {
+    "sharefile-util": "./util/command.js",
+    "sharefile-util-metadata": "./util/command-metadata.js"
+  },
   "devDependencies": {
     "@octoblu/shmock": "^0.7.2",
     "chai": "^3.5.0",
@@ -34,6 +38,8 @@
   "dependencies": {
     "body-parser": "^1.14.1",
     "coffee-script": "^1.10.0",
+    "colors": "^1.1.2",
+    "commander": "^2.9.0",
     "cors": "^2.5.3",
     "debug": "^2.2.0",
     "errorhandler": "^1.4.2",
