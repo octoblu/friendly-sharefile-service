@@ -1,6 +1,6 @@
 {
   "name": "sharefile-service",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Put some description here",
   "keywords": [],
   "homepage": "https://github.com/octoblu/sharefile-service",
@@ -21,6 +21,7 @@
   "bin": {
     "sharefile-util": "./util/command.js",
     "sharefile-util-files": "./util/command-files.js",
+    "sharefile-util-get-item": "./util/command-get-item.js",
     "sharefile-util-list": "./util/command-list.js",
     "sharefile-util-metadata": "./util/command-metadata.js",
     "sharefile-util-share": "./util/command-share.js"
