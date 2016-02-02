@@ -1,6 +1,6 @@
 _       = require 'lodash'
 Items   = require '../models/items'
-debug   = require('debug')('sharefile-service:service')
+debug   = require('debug')('friendly-sharefile-service:service')
 request = require 'request'
 
 class SharefileService

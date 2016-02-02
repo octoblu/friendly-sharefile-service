@@ -1,15 +1,15 @@
-# sharefile-service
+# friendly-sharefile-service
 
-[![Dependency status](http://img.shields.io/david/octoblu/sharefile-service.svg?style=flat)](https://david-dm.org/octoblu/sharefile-service)
-[![devDependency Status](http://img.shields.io/david/dev/octoblu/sharefile-service.svg?style=flat)](https://david-dm.org/octoblu/sharefile-service#info=devDependencies)
-[![Build Status](http://img.shields.io/travis/octoblu/sharefile-service.svg?style=flat&branch=master)](https://travis-ci.org/octoblu/sharefile-service)
+[![Dependency status](http://img.shields.io/david/octoblu/friendly-sharefile-service.svg?style=flat)](https://david-dm.org/octoblu/friendly-sharefile-service)
+[![devDependency Status](http://img.shields.io/david/dev/octoblu/friendly-sharefile-service.svg?style=flat)](https://david-dm.org/octoblu/friendly-sharefile-service#info=devDependencies)
+[![Build Status](http://img.shields.io/travis/octoblu/friendly-sharefile-service.svg?style=flat&branch=master)](https://travis-ci.org/octoblu/friendly-sharefile-service)
 
-[![NPM](https://nodei.co/npm/sharefile-service.svg?style=flat)](https://npmjs.org/package/sharefile-service)
+[![NPM](https://nodei.co/npm/friendly-sharefile-service.svg?style=flat)](https://npmjs.org/package/friendly-sharefile-service)
 
 ## Installing
 
 ```bash
-$ npm install sharefile-service
+$ npm install friendly-sharefile-service
 ```
 
 ### Usage

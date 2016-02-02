@@ -1,10 +1,10 @@
 {
-  "name": "sharefile-service",
+  "name": "friendly-sharefile-service",
   "version": "3.0.0",
   "description": "Put some description here",
   "keywords": [],
-  "homepage": "https://github.com/octoblu/sharefile-service",
-  "bugs": "https://github.com/octoblu/sharefile-service/issues",
+  "homepage": "https://github.com/octoblu/friendly-sharefile-service",
+  "bugs": "https://github.com/octoblu/friendly-sharefile-service/issues",
   "author": {
     "name": "Octoblu",
     "url": "https://github.com/octoblu"
@@ -12,7 +12,7 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/octoblu/sharefile-service.git"
+    "url": "https://github.com/octoblu/friendly-sharefile-service.git"
   },
   "scripts": {
     "start": "node command.js",
