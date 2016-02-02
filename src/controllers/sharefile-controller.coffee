@@ -1,21 +1,35 @@
 SharefileService   = require '../services/sharefile-service'
 
 class SharefileController
-  metadata: (request, response) =>
+  getMetadataById: (request, response) =>
     {itemId} = request.params
-    @_getShareFileService(request).metadata {itemId}, (error, result) =>
+    @_getShareFileService(request).getMetadataById {itemId}, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
-  getItemsById: (request, response) =>
+  getMetadataByPath: (request, response) =>
+    {path} = request.query
+
+    @_getShareFileService(request).getMetadataByPath {path}, (error, result) =>
+      return response.status(error.code || 500).send(error: error.message) if error?
+      response.status(result.code).send result.body
+
+  getItemById: (request, response) =>
     {itemId} = request.params
 
-    @_getShareFileService(request).getItemsById {itemId}, (error, result) =>
+    @_getShareFileService(request).getItemById {itemId}, (error, result) =>
+      return response.status(error.code || 500).send(error: error.message) if error?
+      response.status(result.code).send result.body
+
+  getItemByPath: (request, response) =>
+    {path} = request.query
+
+    @_getShareFileService(request).getItemByPath {path}, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
   list: (request, response) =>
-    @_getShareFileService(request).list request.body, (error, result) =>
+    @_getShareFileService(request).list (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
@@ -35,19 +49,31 @@ class SharefileController
       response.status(result.code).send result.body
 
   getHomeFolder: (request, response) =>
-    @_getShareFileService(request).getHomeFolder request.body, (error, result) =>
+    @_getShareFileService(request).getHomeFolder (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
-  getTreeView: (request, response) =>
+  getTreeViewById: (request, response) =>
     {itemId} = request.params
-    @_getShareFileService(request).getTreeView {itemId}, (error, result) =>
+    @_getShareFileService(request).getTreeViewById {itemId}, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
-  getChildren: (request, response) =>
+  getTreeViewByPath: (request, response) =>
+    {path} = request.query
+    @_getShareFileService(request).getTreeViewByPath {itemId}, (error, result) =>
+      return response.status(error.code || 500).send(error: error.message) if error?
+      response.status(result.code).send result.body
+
+  getChildrenById: (request, response) =>
     {itemId} = request.params
     @_getShareFileService(request).getChildren {itemId}, (error, result) =>
+      return response.status(error.code || 500).send(error: error.message) if error?
+      response.status(result.code).send result.body
+
+  getChildrenByPath: (request, response) =>
+    {path} = request.query
+    @_getShareFileService(request).getChildrenByPath {path}, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 

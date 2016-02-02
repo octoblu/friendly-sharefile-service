@@ -6,29 +6,23 @@ request = require 'request'
 class SharefileService
   constructor: ({@sharefileDomain,@token}) ->
 
-  metadata: ({itemId}, callback) =>
+  getMetadataById: ({itemId}, callback) =>
     options = @_getRequestOptions()
     options.uri = "/Items(#{itemId})/Metadata"
 
-    debug 'request options', options
+    debug 'getMetadataById request options', options
     request.get options, (error, response, body) =>
-      debug 'request result', error, response?.statusCode, body
+      debug 'getMetadataById request result', error, response?.statusCode, body
       return callback @_createError 500, error.message if error?
       return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
       callback null, @_createResponse response, body
 
-  getItemsById: ({itemId}, callback) =>
-    options = @_getRequestOptions()
-    options.uri = "/Items(id=#{itemId})"
+  getMetadataByPath: ({path}, callback) =>
+    return callback @_createError 422, "Missing path" unless path?
 
-    debug 'request options', options
-    request.get options, (error, response, body) =>
-      debug 'request result', error, response?.statusCode, body
-      return callback @_createError 500, error.message if error?
-      return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
-      items = new Items()
-      items.addRawSet body.value
-      callback null, @_createResponse response, items.convert()
+    @getItemByPath {path}, (error, result) =>
+      return callback error if error?
+      @getMetadataById {itemId: result.body.id}, callback
 
   shareByPath: ({title, email, path}, callback) =>
     return callback @_createError 422, "Missing path" unless path?
@@ -65,25 +59,26 @@ class SharefileService
       return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
       callback null, @_createResponse response, body
 
-  getHomeFolder: ({}, callback) =>
+  getHomeFolder: (callback) =>
     options = @_getRequestOptions()
     options.uri = '/Items'
 
-    #Get HomeFolder for Current User
+    debug 'getHomeFolder options', options
     request.get options, (error, response, body) =>
-      debug 'HomeFolder result', error, response?.statusCode, body
+      debug 'getHomeFolder result', error, response?.statusCode, body
       return callback @_createError 500, error.message if error?
       return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
       items = new Items()
       items.addRaw body
       callback null, @_createResponse response, items.convert()
 
-  getChildren: ({itemId}, callback) =>
+  getChildrenById: ({itemId}, callback) =>
     options = @_getRequestOptions()
     options.uri = "/Items(id=#{itemId})/Children"
 
+    debug 'getChildren options', options
     request.get options, (error, response, body) =>
-      debug 'children result', error, response?.statusCode, body
+      debug 'getChildren result', error, response?.statusCode, body
       return callback @_createError 500, error.message if error?
       return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
 
@@ -91,7 +86,14 @@ class SharefileService
       items.addRawSet body.value
       callback null, @_createResponse response, items.convert()
 
-  getTreeView: ({itemId}, callback) =>
+  getChildrenByPath: ({path}, callback) =>
+    return callback @_createError 422, "Missing path" unless path?
+
+    @getItemByPath {path}, (error, result) =>
+      return callback error if error?
+      @getChildrenById {itemId: result.body.id}, callback
+
+  getTreeViewById: ({itemId}, callback) =>
     options = @_getRequestOptions()
     options.uri = "/Items(#{itemId})"
     options.qs =
@@ -99,7 +101,9 @@ class SharefileService
       sourceId: itemId
       canCreateRootFolder:false
 
+    debug 'getTreeViewById options', options
     request.get options, (error, response, body) =>
+      debug 'getTreeViewById result', error, response?.statusCode, body
       return callback @_createError 500, error.message if error?
       return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
 
@@ -107,9 +111,16 @@ class SharefileService
       items.addRawSet body
       callback null, @_createResponse response, items.convert()
 
-  list: ({}, callback) =>
+  getTreeViewByPath: ({path}, callback) =>
+    return callback @_createError 422, "Missing path" unless path?
+
+    @getItemByPath {path}, (error, result) =>
+      return callback error if error?
+      @getTreeViewById {itemId: result.body.id}, callback
+
+  list: (callback) =>
     items = new Items()
-    @getHomeFolder {}, (error, result) =>
+    @getHomeFolder (error, result) =>
       return callback error if error?
       {Id} = result.body
       items.addSet result.body
@@ -119,8 +130,21 @@ class SharefileService
         items.addSet result.body
         callback null, @_createResponse statusCode: 200, items.convert()
 
+  getItemById: ({itemId}, callback) =>
+    options = @_getRequestOptions()
+    options.uri = "/Items(id=#{itemId})"
+
+    debug 'getItemsById request options', options
+    request.get options, (error, response, body) =>
+      debug 'getItemsById request result', error, response?.statusCode, body
+      return callback @_createError 500, error.message if error?
+      return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
+      items = new Items()
+      items.addRawSet body.value
+      callback null, @_createResponse response, items.convert()
+
   getItemByPath: ({path}, callback) =>
-    @list {}, (error, result) =>
+    @list (error, result) =>
       return callback error if error?
       items = new Items()
       items.addSet result.body
