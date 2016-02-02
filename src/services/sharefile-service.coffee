@@ -27,19 +27,21 @@ class SharefileService
       return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
       callback null, @_createResponse response, body
 
-  share: (body, callback) =>
-    defaultBody =
+  share: ({title, email, itemId}, callback) =>
+    body =
       ShareType: 'Send'
       RequireLogin: false
       RequireUserInfo: false
       MaxDownloads: -1
       UsesStreamIDs: false
-    body = _.defaults body, defaultBody
 
-    return callback @_createError 422, "Missing Title" unless body.Title?
-    return callback @_createError 422, "Missing Items" unless body.Items?
-    return callback @_createError 422, "Missing Recipients" unless body.Recipients?
-    return callback @_createError 422, "Missing ExpirationDate" unless body.ExpirationDate?
+    return callback @_createError 422, "Missing title" unless title?
+    return callback @_createError 422, "Missing itemId" unless itemId?
+    return callback @_createError 422, "Missing email" unless email?
+
+    body.Title = title
+    body.Recipients = [User: Email: email]
+    body.Items = [Id: itemId]
 
     options = @_getRequestOptions()
     options.uri = "/Shares"
@@ -54,7 +56,7 @@ class SharefileService
       return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
       callback null, @_createResponse response, body
 
-  list: (body, callback) =>
+  list: ({}, callback) =>
     options = @_getRequestOptions()
     options.uri = '/Items'
 

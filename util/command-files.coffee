@@ -3,23 +3,23 @@ commander        = require 'commander'
 colors           = require 'colors'
 ShareFileService = require '../index.js'
 
-class MetadataCommand
+class FilesCommand
   run: =>
     @parseOptions()
-    @getMetadata()
+    @getFiles()
 
-  getMetadata: =>
+  getFiles: =>
     # return
     sharefileService = new ShareFileService {@token, @sharefileDomain}
-    sharefileService.metadata {@itemId}, (error, result) =>
-      return console.log colors.red "Error getting metadata: #{error.message}" if error?
+    sharefileService.files {@itemId}, (error, result) =>
+      return console.log colors.red "Error getting files: #{error.message}" if error?
       console.log JSON.stringify result.body, null, 2
 
   parseOptions: =>
     commander
       .option '-D, --Domain <Domain>', 'The domain name for Sharefile'
       .option '-t, --token <token>', 'The token for Sharefile'
-      .option '-i, --id <itemId>', 'The metadata itemId'
+      .option '-i, --id <itemId>', 'The file itemId'
       .parse process.argv
 
     @sharefileDomain = commander.Domain
@@ -30,4 +30,4 @@ class MetadataCommand
       commander.outputHelp()
       process.exit 0
 
-(new MetadataCommand()).run()
+(new FilesCommand()).run()
