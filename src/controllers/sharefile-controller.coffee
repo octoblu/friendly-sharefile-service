@@ -62,7 +62,7 @@ class SharefileController
 
   getTreeViewByPath: (request, response) =>
     {path} = request.query
-    @_getShareFileService(request).getTreeViewByPath {itemId}, (error, result) =>
+    @_getShareFileService(request).getTreeViewByPath {path}, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
