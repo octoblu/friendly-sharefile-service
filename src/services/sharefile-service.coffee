@@ -197,12 +197,12 @@ class SharefileService
         return callback error if error?
         callback null, @_createResponse statusCode: 200, data
 
-  downloadFileByPath: ({path}, fileData, callback) =>
+  downloadFileByPath: ({path}, callback) =>
     return callback @_createError 422, "Missing path" unless path?
 
     @getItemByPath {path}, (error, result) =>
       return callback error if error?
-      @downloadFileById {itemId: result.body.id}, fileData, callback
+      @downloadFileById {itemId: result.body.id}, callback
 
   _downloadFileFromStorage: ({uri}, callback) =>
     debug 'downloading file from storage', uri
