@@ -67,13 +67,26 @@ class SharefileController
 
   getChildrenById: (request, response) =>
     {itemId} = request.params
-    @_getShareFileService(request).getChildren {itemId}, (error, result) =>
+    @_getShareFileService(request).getChildrenById {itemId}, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
   getChildrenByPath: (request, response) =>
     {path} = request.query
     @_getShareFileService(request).getChildrenByPath {path}, (error, result) =>
+      return response.status(error.code || 500).send(error: error.message) if error?
+      response.status(result.code).send result.body
+
+  uploadFileById: (request, response) =>
+    {itemId} = request.params
+    {fileName,title,description,batchId,batchLast} = request.query
+    @_getShareFileService(request).uploadFileById {itemId,fileName,title,description,batchId,batchLast}, request.body, (error, result) =>
+      return response.status(error.code || 500).send(error: error.message) if error?
+      response.status(result.code).send result.body
+
+  uploadFileByPath: (request, response) =>
+    {path,fileName,title,description,batchId,batchLast} = request.query
+    @_getShareFileService(request).uploadFileByPath {path,fileName,title,description,batchId,batchLast}, request.body, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 

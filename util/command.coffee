@@ -17,6 +17,7 @@ class Command
       .command 'list',        'list files'
       .command 'metadata',    'get metadata'
       .command 'share',       'share file'
+      .command 'upload',      'upload file'
       .parse process.argv
 
     unless commander.runningCommand

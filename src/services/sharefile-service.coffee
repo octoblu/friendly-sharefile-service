@@ -125,7 +125,7 @@ class SharefileService
       {Id} = result.body
       items.addSet result.body
 
-      @getChildren {itemId:Id}, (error, result) =>
+      @getChildrenById {itemId:Id}, (error, result) =>
         return callback error if error?
         items.addSet result.body
         callback null, @_createResponse statusCode: 200, items.convert()
@@ -151,6 +151,47 @@ class SharefileService
       item = items.getByPath path
       return callback @_createError 404, 'Item not found' unless item?
       callback null, @_createResponse statusCode: 200, item
+
+  uploadFileById: ({itemId, fileName, title, description, batchId, batchLast}, fileData, callback) =>
+    options = @_getRequestOptions()
+    options.uri = "/Items(#{itemId})/Upload"
+    options.qs =
+      id: itemId
+      method: 'standard'
+      raw: true
+      fileName: fileName
+      batchId: batchId
+      batchLast: batchLast
+      title: title ? fileName
+      details: description ? "#{fileName} description"
+      notify: true
+
+    debug 'uploadFileById request options', options
+    request.post options, (error, response, body) =>
+      debug 'uploadFileById request result', error, response?.statusCode, body
+      return callback @_createError 500, error.message if error?
+      return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
+      @_postToChuckUri {uri: body.ChunkUri}, fileData, (error) =>
+        return callback error if error?
+        callback null, @_createResponse response, body
+
+  uploadFileByPath: ({fileName, title, description, batchId, batchLast, path}, fileData, callback) =>
+    return callback @_createError 422, "Missing path" unless path?
+
+    @getItemByPath {path}, (error, result) =>
+      return callback error if error?
+      @uploadFileById {fileName, title, description, batchId, batchLast,itemId: result.body.id}, fileData, callback
+
+  _postToChuckUri: ({uri}, fileData, callback) =>
+    options =
+      body: fileData
+
+    debug 'post to chunk options', options
+    request.post uri, options, (error, response, body) =>
+      debug 'post to chuck result', error, response?.statusCode, body
+      return callback @_createError 500, error.message if error?
+      return callback @_createError response.statusCode, body if response.statusCode > 299
+      return callback null
 
   _getRequestOptions: =>
     return {
