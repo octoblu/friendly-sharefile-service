@@ -2,6 +2,7 @@ _       = require 'lodash'
 Items   = require '../models/items'
 debug   = require('debug')('friendly-sharefile-service:service')
 request = require 'request'
+async   = require 'async'
 
 class SharefileService
   constructor: ({@sharefileDomain,@token}) ->
@@ -59,29 +60,16 @@ class SharefileService
       return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
       callback null, @_createResponse response, body
 
-  getHomeFolder: (callback) =>
-    options = @_getRequestOptions()
-    options.uri = '/Items'
-
-    debug 'getHomeFolder options', options
-    request.get options, (error, response, body) =>
-      debug 'getHomeFolder result', error, response?.statusCode, body
-      return callback @_createError 500, error.message if error?
-      return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
-      items = new Items()
-      items.addRaw body
-      callback null, @_createResponse response, items.convert()
-
   getChildrenById: ({itemId}, callback) =>
     options = @_getRequestOptions()
-    options.uri = "/Items(id=#{itemId})/Children"
-
+    options.uri = "/Items(#{itemId})/Children"
+    options.qs =
+      includeDeleted: false
     debug 'getChildren options', options
     request.get options, (error, response, body) =>
       debug 'getChildren result', error, response?.statusCode, body
       return callback @_createError 500, error.message if error?
       return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
-
       items = new Items()
       items.addRawSet body.value
       callback null, @_createResponse response, items.convert()
@@ -97,7 +85,7 @@ class SharefileService
     options = @_getRequestOptions()
     options.uri = "/Items(#{itemId})"
     options.qs =
-      treemode: 'mode'
+      treemode: 'manage'
       sourceId: itemId
       canCreateRootFolder:false
 
@@ -108,7 +96,7 @@ class SharefileService
       return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
 
       items = new Items()
-      items.addRawSet body
+      items.addRaw body
       callback null, @_createResponse response, items.convert()
 
   getTreeViewByPath: ({path}, callback) =>
@@ -122,17 +110,16 @@ class SharefileService
     items = new Items()
     @getHomeFolder (error, result) =>
       return callback error if error?
-      {Id} = result.body
-      items.addSet result.body
+      items.add result.body
 
-      @getChildrenById {itemId:Id}, (error, result) =>
+      @getChildrenById {itemId:result.body.id}, (error, result) =>
         return callback error if error?
         items.addSet result.body
         callback null, @_createResponse statusCode: 200, items.convert()
 
   getItemById: ({itemId}, callback) =>
     options = @_getRequestOptions()
-    options.uri = "/Items(id=#{itemId})"
+    options.uri = "/Items(#{itemId})"
 
     debug 'getItemsById request options', options
     request.get options, (error, response, body) =>
@@ -144,13 +131,23 @@ class SharefileService
       callback null, @_createResponse response, items.convert()
 
   getItemByPath: ({path}, callback) =>
-    @list (error, result) =>
-      return callback error if error?
-      items = new Items()
-      items.addSet result.body
-      item = items.getByPath path
+    # Home folder is first, so skip it
+    segments = _.tail Items.GetPathSegments path
+    item =
+      id: 'home'
+    @getItemForPathSegment {item, segments, path}, callback
+
+      # callback null, @_createResponse statusCode: 200, item
+  getItemForPathSegment: ({item, segments, path}, callback) =>
+    currentSegment = _.first segments
+    return callback null, @_createResponse statusCode: 200, item unless currentSegment?
+    @getChildrenById {itemId: item.id}, (error, result) =>
+      return callback error if error
+      item = _.find result.body, name: currentSegment
       return callback @_createError 404, 'Item not found' unless item?
-      callback null, @_createResponse statusCode: 200, item
+      # Or be recursive
+      item.path = path
+      @getItemForPathSegment {item, segments: _.tail(segments), path}, callback
 
   uploadFileById: ({itemId, fileName, title, description, batchId, batchLast}, fileData, callback) =>
     options = @_getRequestOptions()

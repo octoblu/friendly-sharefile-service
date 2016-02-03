@@ -50,7 +50,7 @@ class SharefileController
       response.status(result.code).send result.body
 
   getHomeFolder: (request, response) =>
-    @_getShareFileService(request).getHomeFolder (error, result) =>
+    @_getShareFileService(request).getChildrenById {itemId:'home'}, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 

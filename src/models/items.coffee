@@ -9,16 +9,7 @@ class Items
 
   addRaw: (item) =>
     return unless item.Id
-    @add
-      id: item.Id
-      path: null
-      name: item.FileName || item.Name
-      parentId: item.Parent.Id
-      creationDate: item.CreationDate
-      expirationDate: item.ExpirationDate
-      hidden: item.IsHidden
-      fileSizeBytes: item.FileSizeBytes
-      _raw: item
+    @add Items.ConvertRaw item
 
   addSet: (items) =>
     _.each items, @add
@@ -29,21 +20,37 @@ class Items
   convert: =>
     finalItems = []
 
-    _.each @items, (item, itemId) =>
+    _.each @items, (item) =>
       return unless item?._raw?.Path?
-      pathSegements = _.tail item._raw.Path.split('/')
-      pathSegements.push itemId
-      friendlyPaths = _.map pathSegements, (segment) =>
-        return if segment == 'root'
-        return @items[segment].name if @items[segment]?
-      friendlyPaths = _.compact friendlyPaths
-      item.path = "/#{friendlyPaths.join('/')}"
+      pathSegements = Items.GetPathSegments item._raw.Path
+      path = @_pathToFriendly pathSegements
+      item.path = path
       finalItems.push item
 
     return finalItems
 
-  getByPath: (path) =>
-    path = _.trimEnd path, '/'
-    return _.find @convert(), path: path
+  _pathToFriendly: (pathSegements) =>
+    friendlyPaths = _.map pathSegements, (segment) =>
+      return @items[segment].name if @items[segment]?
+    friendlyPaths = _.compact friendlyPaths
+    "/#{friendlyPaths.join('/')}"
+
+  @GetPathSegments: (path) =>
+    pathSegements = path.split('/')
+    pathSegements = _.without pathSegements, 'root'
+    pathSegements = _.tail pathSegements
+    pathSegements
+
+  @ConvertRaw: (item) =>
+    return {
+      id: item.Id
+      path: null
+      name: item.FileName || item.Name
+      creationDate: item.CreationDate
+      expirationDate: item.ExpirationDate
+      hidden: item.IsHidden
+      fileSizeBytes: item.FileSizeBytes
+      _raw: item
+    }
 
 module.exports = Items
