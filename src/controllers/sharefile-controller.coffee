@@ -42,7 +42,8 @@ class SharefileController
       response.status(result.code).send result.body
 
   shareByPath: (request, response) =>
-    {email, title, path} = request.body
+    {path} = request.query
+    {email, title} = request.body
 
     @_getShareFileService(request).shareByPath {path, email, title}, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
