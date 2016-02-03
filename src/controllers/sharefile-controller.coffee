@@ -90,6 +90,18 @@ class SharefileController
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
+  downloadFileById: (request, response) =>
+    {itemId} = request.params
+    @_getShareFileService(request).downloadFileById {itemId}, (error, result) =>
+      return response.status(error.code || 500).send(error: error.message) if error?
+      response.status(result.code).send result.body
+
+  downloadFileByPath: (request, response) =>
+    {path} = request.query
+    @_getShareFileService(request).downloadFileByPath {path}, (error, result) =>
+      return response.status(error.code || 500).send(error: error.message) if error?
+      response.status(result.code).send result.body
+
   _getShareFileService: (request) =>
     {token} = request
     sharefileDomain = request.query.domain

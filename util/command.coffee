@@ -13,11 +13,12 @@ class Command
   run: =>
     commander
       .version packageJSON.version
-      .command 'get-item',    'get item from path'
-      .command 'list',        'list files'
-      .command 'metadata',    'get metadata'
-      .command 'share',       'share file'
-      .command 'upload',      'upload file'
+      .command 'download', 'download file'
+      .command 'get-item', 'get item from path'
+      .command 'list',     'list files'
+      .command 'metadata', 'get metadata'
+      .command 'share',    'share file'
+      .command 'upload',   'upload file'
       .parse process.argv
 
     unless commander.runningCommand

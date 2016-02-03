@@ -156,7 +156,6 @@ class SharefileService
     options = @_getRequestOptions()
     options.uri = "/Items(#{itemId})/Upload"
     options.qs =
-      id: itemId
       method: 'standard'
       raw: true
       fileName: fileName
@@ -181,6 +180,36 @@ class SharefileService
     @getItemByPath {path}, (error, result) =>
       return callback error if error?
       @uploadFileById {fileName, title, description, batchId, batchLast,itemId: result.body.id}, fileData, callback
+
+  downloadFileById: ({itemId}, callback) =>
+    options = @_getRequestOptions()
+    options.uri = "/Items(#{itemId})/Download"
+    options.qs =
+      redirect: false
+      includeAllVersions: false
+
+    debug 'downloadFile request options', options
+    request.get options, (error, response, body) =>
+      debug 'downloadFile request result', error, response?.statusCode, body
+      return callback @_createError 500, error.message if error?
+      return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
+      @_downloadFileFromStorage {uri: body.DownloadUrl}, (error, data) =>
+        return callback error if error?
+        callback null, @_createResponse statusCode: 200, data
+
+  downloadFileByPath: ({path}, fileData, callback) =>
+    return callback @_createError 422, "Missing path" unless path?
+
+    @getItemByPath {path}, (error, result) =>
+      return callback error if error?
+      @downloadFileById {itemId: result.body.id}, fileData, callback
+
+  _downloadFileFromStorage: ({uri}, callback) =>
+    debug 'downloading file from storage', uri
+    request.get uri, (error, response, body) =>
+      return callback @_createError 500, error.message if error?
+      return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
+      callback null, body
 
   _postToChuckUri: ({uri}, fileData, callback) =>
     options =
