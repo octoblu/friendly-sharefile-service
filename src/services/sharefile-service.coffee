@@ -15,7 +15,7 @@ class SharefileService
       debug 'getMetadataById request result', error, response?.statusCode, body
       return callback @_createError 500, error.message if error?
       return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
-      callback null, @_createResponse response, body
+      callback null, @_createResponse response, body.value
 
   getMetadataByPath: ({path}, callback) =>
     return callback @_createError 422, "Missing path" unless path?
