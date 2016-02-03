@@ -18,15 +18,14 @@ class DownloadCommand
   downloadFileById: =>
     sharefileService = new ShareFileService {@token, @sharefileDomain}
     sharefileService.downloadFileById {@itemId}, (error, result) =>
-      return console.log colors.red "Error: #{error.message}" if error?
-      console.log JSON.stringify result.body, null, 2
+      return console.error colors.red "Error: #{error.message}" if error?
+      console.log result.body
 
   downloadFileByPath: =>
     sharefileService = new ShareFileService {@token, @sharefileDomain}
     sharefileService.downloadFileByPath {@path}, (error, result) =>
-      return console.log colors.red "Error: #{error.message}" if error?
-
-      console.log JSON.stringify result.body, null, 2
+      return console.error colors.red "Error: #{error.message}" if error?
+      console.log result.body
 
   parseOptions: =>
     commander
@@ -43,10 +42,10 @@ class DownloadCommand
 
     unless @sharefileDomain? and @token?
       commander.outputHelp()
-      process.exit 0
+      process.exit 1
 
     unless @path? or @itemId?
       commander.outputHelp()
-      process.exit 0
+      process.exit 1
 
 (new DownloadCommand()).run()
