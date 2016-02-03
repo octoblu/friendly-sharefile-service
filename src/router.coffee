@@ -4,11 +4,10 @@ class Router
   route: (app) =>
     sharefileController = new SharefileController {}
 
-
-    # app.get '/download/:itemId', sharefileController.download
+    app.get '/:domain/items', sharefileController.list
+    app.get '/:domain/home/folder', sharefileController.getHomeFolder
 
     # By Path
-    app.get '/:domain/items', sharefileController.list
     app.get '/:domain/items-by-path', sharefileController.getItemByPath
     app.get '/:domain/items-by-path/metadata', sharefileController.getMetadataByPath
     app.get '/:domain/items-by-path/children', sharefileController.getChildrenByPath
@@ -26,7 +25,6 @@ class Router
     app.post '/:domain/items/:itemId/share', sharefileController.shareById
     app.post '/:domain/items/:itemId/upload', sharefileController.uploadFileById
 
-    app.get '/:domain/home/folder', sharefileController.getHomeFolder
 
     # Still needs webhooks from ShareFile
     # app.get '/change/:itemId', sharefileController.change

@@ -11,8 +11,13 @@ class Items
     return unless item.Id
     @add
       id: item.Id
+      path: null
       name: item.FileName || item.Name
-      originalPath: item.Path
+      parentId: item.Parent.Id
+      creationDate: item.CreationDate
+      expirationDate: item.ExpirationDate
+      hidden: item.IsHidden
+      fileSizeBytes: item.FileSizeBytes
       _raw: item
 
   addSet: (items) =>
@@ -25,7 +30,8 @@ class Items
     finalItems = []
 
     _.each @items, (item, itemId) =>
-      pathSegements = _.tail item.originalPath.split('/')
+      return unless item?._raw?.Path?
+      pathSegements = _.tail item._raw.Path.split('/')
       pathSegements.push itemId
       friendlyPaths = _.map pathSegements, (segment) =>
         return if segment == 'root'
