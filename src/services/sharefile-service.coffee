@@ -172,7 +172,7 @@ class SharefileService
       return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
       @_postToChuckUri {uri: body.ChunkUri}, fileData, (error) =>
         return callback error if error?
-        callback null, @_createResponse response, body
+        callback null, @_createResponse response, success: true
 
   uploadFileByPath: ({fileName, title, description, batchId, batchLast, path}, fileData, callback) =>
     return callback @_createError 422, "Missing path" unless path?
