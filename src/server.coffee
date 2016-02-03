@@ -26,12 +26,6 @@ class Server
     app.use bodyParser.json limit : '1mb'
     app.use bearerToken()
 
-    app.use (request, response, next) =>
-      sharefileDomain = request.header 'X-SHAREFILE-DOMAIN'
-      return response.status(422).send error: 'Missing X-SHAREFILE-DOMAIN header' unless sharefileDomain?
-      request.sharefileDomain = sharefileDomain
-      next()
-
     app.options '*', cors()
 
     router = new Router {}

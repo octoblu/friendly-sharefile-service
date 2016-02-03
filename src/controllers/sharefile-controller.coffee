@@ -91,7 +91,8 @@ class SharefileController
       response.status(result.code).send result.body
 
   _getShareFileService: (request) =>
-    {token,sharefileDomain} = request
+    {token} = request
+    sharefileDomain = request.query.domain
     new SharefileService {token, sharefileDomain}
 
 module.exports = SharefileController
