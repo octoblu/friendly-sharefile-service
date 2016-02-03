@@ -43,6 +43,7 @@ class Items
     return finalItems
 
   getByPath: (path) =>
+    path = _.trimEnd path, '/'
     return _.find @convert(), path: path
 
 module.exports = Items
