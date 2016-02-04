@@ -1,6 +1,6 @@
 {
   "name": "friendly-sharefile-service",
-  "version": "6.0.10",
+  "version": "6.1.0",
   "description": "Put some description here",
   "keywords": [],
   "homepage": "https://github.com/octoblu/friendly-sharefile-service",
@@ -25,6 +25,7 @@
     "sharefile-util-list": "./util/command-list.js",
     "sharefile-util-metadata": "./util/command-metadata.js",
     "sharefile-util-share": "./util/command-share.js",
+    "sharefile-util-transfer": "./util/command-transfer.js",
     "sharefile-util-upload": "./util/command-upload.js"
   },
   "devDependencies": {

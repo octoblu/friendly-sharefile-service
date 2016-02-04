@@ -18,6 +18,7 @@ class Command
       .command 'list',     'list files'
       .command 'metadata', 'get metadata'
       .command 'share',    'share file'
+      .command 'transfer', 'transfer file'
       .command 'upload',   'upload file'
       .parse process.argv
 

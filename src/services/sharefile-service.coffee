@@ -1,5 +1,6 @@
 _       = require 'lodash'
 Items   = require '../models/items'
+Dropbox = require '../models/dropbox'
 debug   = require('debug')('friendly-sharefile-service:service')
 request = require 'request'
 async   = require 'async'
@@ -200,6 +201,19 @@ class SharefileService
     @getItemByPath {path}, (error, result) =>
       return callback error if error?
       @downloadFileById {itemId: result.body.id}, callback
+
+  transferDropboxFileById: ({itemId,link}, callback) =>
+    dropbox = new Dropbox()
+    dropbox.download {link}, (error, fileData, fileName) =>
+      return callback @_createError 400, error.message if error?
+      @uploadFileById {itemId, fileName}, fileData, callback
+
+  transferDropboxFileByPath: ({path,link}, callback) =>
+    return callback @_createError 422, "Missing path" unless path?
+
+    @getItemByPath {path}, (error, result) =>
+      return callback error if error?
+      @transferDropboxFileById {itemId: result.body.id,link}, callback
 
   _downloadFileFromStorage: ({uri}, callback) =>
     debug 'downloading file from storage', uri

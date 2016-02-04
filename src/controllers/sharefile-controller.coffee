@@ -106,6 +106,22 @@ class SharefileController
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
+  transferDropboxFileById: (request, response) =>
+    {itemId} = request.params
+    {link} = request.body
+
+    @_getShareFileService(request).transferDropboxFileById {itemId,fileName,title,description,batchId,batchLast}, contents, (error, result) =>
+      return response.status(error.code || 500).send(error: error.message) if error?
+      response.status(result.code).send result.body
+
+  transferDropboxFileByPath: (request, response) =>
+    {path} = request.query
+    {link} = request.body
+
+    @_getShareFileService(request).transferDropboxFileByPath {path,fileName,title,description,batchId,batchLast}, contents, (error, result) =>
+      return response.status(error.code || 500).send(error: error.message) if error?
+      response.status(result.code).send result.body
+
   _getShareFileService: (request) =>
     {token} = request
     sharefileDomain = request.params.domain
