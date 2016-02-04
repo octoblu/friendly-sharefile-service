@@ -128,7 +128,15 @@ class SharefileService
       items.addRawSet body.value
       callback null, @_createResponse response, items.convert()
 
+  getHomeFolderId: ({path}, callback) =>
+    @getChildrenById {itemId: 'home'}, (error, result) =>
+      return callback error if error?
+      item = _.find result.body, path: path
+      return callback @_createError 404, 'Item not found' unless item?
+      callback null, @_createResponse statusCode: 200, item
+
   getItemByPath: ({path}, callback) =>
+    return @getHomeFolderId {path}, callback if path == '/'
     # Home folder is first, so skip it
     segments = _.tail Items.GetPathSegments path
     item =
