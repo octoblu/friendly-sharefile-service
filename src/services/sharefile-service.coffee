@@ -108,7 +108,7 @@ class SharefileService
 
   list: (callback) =>
     items = new Items()
-    @getHomeFolder (error, result) =>
+    @getChildrenById {itemId:'home'}, (error, result) =>
       return callback error if error?
       items.add result.body
 
