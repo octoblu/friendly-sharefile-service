@@ -63,7 +63,8 @@ class SharefileService
 
   getChildrenById: ({itemId}, callback) =>
     options = @_getRequestOptions()
-    options.uri = "/Items(#{itemId})/Children"
+    options.uri = "/Items(#{itemId})/Children" if itemId == 'home'
+    options.uri = "/Items" unless itemId == 'home'
     options.qs =
       includeDeleted: false
     debug 'getChildren options', options
@@ -111,12 +112,8 @@ class SharefileService
     items = new Items()
     @getChildrenById {itemId:'home'}, (error, result) =>
       return callback error if error?
-      items.add result.body
-
-      @getChildrenById {itemId:result.body.id}, (error, result) =>
-        return callback error if error?
-        items.addSet result.body
-        callback null, @_createResponse statusCode: 200, items.convert()
+      items.addSet result.body
+      return callback null, @_createResponse statusCode: 200, items.convert()
 
   getItemById: ({itemId}, callback) =>
     options = @_getRequestOptions()
