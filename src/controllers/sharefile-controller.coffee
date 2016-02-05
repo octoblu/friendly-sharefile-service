@@ -50,7 +50,7 @@ class SharefileController
       response.status(result.code).send result.body
 
   getHomeFolder: (request, response) =>
-    @_getShareFileService(request).getChildrenById {itemId:'home'}, (error, result) =>
+    @_getShareFileService(request).getHomeFolder (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
@@ -106,19 +106,19 @@ class SharefileController
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
-  transferDropboxFileById: (request, response) =>
+  transferLinkFileById: (request, response) =>
     {itemId} = request.params
-    {link} = request.body
+    {link,fileName} = request.body
 
-    @_getShareFileService(request).transferDropboxFileById {itemId,fileName,title,description,batchId,batchLast}, contents, (error, result) =>
+    @_getShareFileService(request).transferLinkFileById {itemId,fileName,link}, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
-  transferDropboxFileByPath: (request, response) =>
+  transferLinkFileByPath: (request, response) =>
     {path} = request.query
-    {link} = request.body
+    {link,fileName} = request.body
 
-    @_getShareFileService(request).transferDropboxFileByPath {path,fileName,title,description,batchId,batchLast}, contents, (error, result) =>
+    @_getShareFileService(request).transferLinkFileByPath {path,fileName,link}, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 

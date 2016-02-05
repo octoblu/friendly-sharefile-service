@@ -9,20 +9,18 @@ class TransferCommand
     @transferFile()
 
   transferFile: =>
-    # return
-    if @type == 'dropbox'
-      @transferDropboxFileByPath() if @path?
-      @transferDropboxFileById() if @itemId?
+    @transferLinkFileByPath() if @path?
+    @transferLinkFileById() if @itemId?
 
-  transferDropboxFileById: =>
+  transferLinkFileById: =>
     sharefileService = new ShareFileService {@token, @sharefileDomain}
-    sharefileService.transferDropboxFileById {@link, @itemId}, (error, result) =>
+    sharefileService.transferLinkFileById {@link, @itemId}, (error, result) =>
       return console.log colors.red "Error: #{error.message}" if error?
       console.log JSON.stringify result.body, null, 2
 
-  transferDropboxFileByPath: =>
+  transferLinkFileByPath: =>
     sharefileService = new ShareFileService {@token, @sharefileDomain}
-    sharefileService.transferDropboxFileByPath {@link, @path}, (error, result) =>
+    sharefileService.transferLinkFileByPath {@link, @path}, (error, result) =>
       return console.log colors.red "Error: #{error.message}" if error?
       console.log JSON.stringify result.body, null, 2
 
@@ -33,7 +31,6 @@ class TransferCommand
       .option '-i, --id <itemId>', 'The target folder itemId (must have either itemId or path)'
       .option '-p, --path <path>', 'The target folder path (must have either itemId or path)'
       .option '-l, --link <link>', 'Shared link to transfer to Sharefile'
-      .option '-T, --type <dropbox>', 'Service to transfer the file from. (dropbox)'
       .parse process.argv
 
     @filename = _.first commander.args
@@ -42,7 +39,6 @@ class TransferCommand
     @path = commander.path
     @itemId = commander.id
     @link = commander.link
-    @type = commander.type
 
     unless @sharefileDomain? and @token? and @link?
       commander.outputHelp()
@@ -50,11 +46,6 @@ class TransferCommand
 
     unless @path? or @itemId?
       console.log 'Missing Path or Item ID'
-      commander.outputHelp()
-      process.exit 0
-
-    unless @type in ['dropbox']
-      console.log 'Invalid Type'
       commander.outputHelp()
       process.exit 0
 

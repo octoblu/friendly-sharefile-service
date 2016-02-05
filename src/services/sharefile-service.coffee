@@ -1,6 +1,6 @@
 _       = require 'lodash'
 Items   = require '../models/items'
-Dropbox = require '../models/dropbox'
+LinkDownload = require '../models/link-download'
 debug   = require('debug')('friendly-sharefile-service:service')
 request = require 'request'
 async   = require 'async'
@@ -63,8 +63,7 @@ class SharefileService
 
   getChildrenById: ({itemId}, callback) =>
     options = @_getRequestOptions()
-    options.uri = "/Items(#{itemId})/Children" if itemId == 'home'
-    options.uri = "/Items" unless itemId == 'home'
+    options.uri = "/Items(#{itemId})/Children"
     options.qs =
       includeDeleted: false
     debug 'getChildren options', options
@@ -128,20 +127,22 @@ class SharefileService
       items.addRawSet body.value
       callback null, @_createResponse response, items.convert()
 
-  getHomeFolderId: ({path}, callback) =>
-    @getChildrenById {itemId: 'home'}, (error, result) =>
-      return callback error if error?
-      item = _.find result.body, path: path
-      return callback @_createError 404, 'Item not found' unless item?
-      callback null, @_createResponse statusCode: 200, item
+  getHomeFolder: (callback) =>
+    options = @_getRequestOptions()
+    options.uri = "/Items"
+    debug 'getChildren options', options
+    request.get options, (error, response, body) =>
+      debug 'getChildren result', error, response?.statusCode, body
+      return callback @_createError 500, error.message if error?
+      return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
+      callback null, @_createResponse response, Items.ConvertRaw(body)
 
   getItemByPath: ({path}, callback) =>
-    return @getHomeFolderId {path}, callback if path == '/'
     # Home folder is first, so skip it
     segments = _.tail Items.GetPathSegments path
-    item =
-      id: 'home'
-    @getItemForPathSegment {item, segments, path}, callback
+    @getHomeFolder (error, result) =>
+      return callback error if error?
+      @getItemForPathSegment {item:result.body, segments, path}, callback
 
       # callback null, @_createResponse statusCode: 200, item
   getItemForPathSegment: ({item, segments, path}, callback) =>
@@ -150,6 +151,7 @@ class SharefileService
     @getChildrenById {itemId: item.id}, (error, result) =>
       return callback error if error
       item = _.find result.body, name: currentSegment
+      console.log 'item', item, currentSegment, _.map(result.body, 'id')
       return callback @_createError 404, 'Item not found' unless item?
       # Or be recursive
       item.path = path
@@ -207,18 +209,19 @@ class SharefileService
       return callback error if error?
       @downloadFileById {itemId: result.body.id}, callback
 
-  transferDropboxFileById: ({itemId,link}, callback) =>
-    dropbox = new Dropbox()
-    dropbox.download {link}, (error, fileData, fileName) =>
+  transferLinkFileById: ({itemId,link,fileName}, callback) =>
+    linkDownload = new LinkDownload()
+    linkDownload.download {link}, (error, fileData, autoFileName) =>
       return callback @_createError 400, error.message if error?
+      fileName ?= autoFileName
       @uploadFileById {itemId, fileName}, fileData, callback
 
-  transferDropboxFileByPath: ({path,link}, callback) =>
+  transferLinkFileByPath: ({path,link,fileName}, callback) =>
     return callback @_createError 422, "Missing path" unless path?
 
     @getItemByPath {path}, (error, result) =>
       return callback error if error?
-      @transferDropboxFileById {itemId: result.body.id,link}, callback
+      @transferLinkFileById {itemId: result.body.id,link,fileName}, callback
 
   _downloadFileFromStorage: ({uri}, callback) =>
     debug 'downloading file from storage', uri
