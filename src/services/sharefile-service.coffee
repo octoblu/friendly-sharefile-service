@@ -2,6 +2,7 @@ _       = require 'lodash'
 Items   = require '../models/items'
 LinkDownload = require '../models/link-download'
 WritableChunk = require '../models/writable-chunk'
+ChunkUriParser = require '../models/chunk-uri-parser'
 debug   = require('debug')('friendly-sharefile-service:service')
 request = require 'request'
 
@@ -14,7 +15,7 @@ class SharefileService
 
     debug 'getMetadataById request options', options
     request.get options, (error, response, body) =>
-      debug 'getMetadataById request result', error, response?.statusCode, body
+      debug 'getMetadataById request result', error, response?.statusCode
       return callback @_createError 500, error.message if error?
       return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
       callback null, @_createResponse response, body.value
@@ -52,7 +53,7 @@ class SharefileService
 
     debug 'request options', options
     request.post options, (error, response, body) =>
-      debug 'request result', error, response?.statusCode, body
+      debug 'request result', error, response?.statusCode
       return callback @_createError 500, error.message if error?
       return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
       callback null, @_createResponse response, body
@@ -64,7 +65,7 @@ class SharefileService
       includeDeleted: false
     debug 'getChildren options', options
     request.get options, (error, response, body) =>
-      debug 'getChildren result', error, response?.statusCode, body
+      debug 'getChildren result', error, response?.statusCode
       return callback @_createError 500, error.message if error?
       return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
       items = new Items()
@@ -86,7 +87,7 @@ class SharefileService
 
     debug 'getTreeViewById options', options
     request.get options, (error, response, body) =>
-      debug 'getTreeViewById result', error, response?.statusCode, body
+      debug 'getTreeViewById result', error, response?.statusCode
       return callback @_createError 500, error.message if error?
       return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
 
@@ -105,7 +106,7 @@ class SharefileService
 
     debug 'getItemsById request options', options
     request.get options, (error, response, body) =>
-      debug 'getItemsById request result', error, response?.statusCode, body
+      debug 'getItemsById request result', error, response?.statusCode
       return callback @_createError 500, error.message if error?
       return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
       items = new Items()
@@ -117,7 +118,7 @@ class SharefileService
     options.uri = "/Items"
     debug 'getChildren options', options
     request.get options, (error, response, body) =>
-      debug 'getChildren result', error, response?.statusCode, body
+      debug 'getChildren result', error, response?.statusCode
       return callback @_createError 500, error.message if error?
       return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
       callback null, @_createResponse response, Items.ConvertRaw(body)
@@ -143,12 +144,12 @@ class SharefileService
       item.path = path
       @getItemForPathSegment {item, segments: _.tail(segments), path}, callback
 
-  requestChunkUri: ({itemId, fileName, title, description, fileSize}, callback) =>
+  requestChunkUri: ({itemId, fileName, title, description, fileSize, method}, callback) =>
     return callback @_createError 422, 'Empty Content' unless fileSize
     options = @_getRequestOptions()
     options.uri = "/Items(#{itemId})/Upload"
     options.qs =
-      method: 'threaded'
+      method: method ? 'threaded'
       raw: true
       fileName: fileName
       fileSize: fileSize
@@ -159,16 +160,24 @@ class SharefileService
 
     debug 'uploadFileById request options', options
     request.post options, (error, response, body) =>
-      debug 'uploadFileById request result', error, response?.statusCode, body
+      debug 'uploadFileById request result', error, response?.statusCode
       return callback @_createError 500, error.message if error?
       return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
       callback null, ChunkUri: body.ChunkUri, FinishUri: body.FinishUri
 
   uploadFileById: ({fileName, title, description, itemId}, fileData, callback) =>
     fileData = JSON.stringify fileData, null, 2 if _.isPlainObject fileData
-    @requestChunkUri {itemId, fileName, title, description, fileSize: fileData.length}, (error, result) =>
+    method = 'standard'
+    @requestChunkUri {method, itemId, fileName, title, description, fileSize: fileData.length}, (error, result) =>
       return callback error if error?
-      request.post result.ChunkUri, body: fileData, (error, response, body) =>
+      chunkUri = ChunkUriParser.parse
+        uri:  result.ChunkUri
+        chunk: fileData
+        byteOffset: 0
+        index: 0
+        isLast: true
+      debug 'chunk uri', chunkUri
+      request.post chunkUri, body: fileData, (error, response, body) =>
         return callback @_createError 500, error.message if error?
         return callback @_createError response.statusCode, body if response.statusCode > 299
         callback null, @_createResponse {statusCode: 201}, success: true
@@ -187,7 +196,7 @@ class SharefileService
 
     debug 'downloadFile request options', options
     request.get options, (error, response, body) =>
-      debug 'downloadFile request result', error, response?.statusCode, body
+      debug 'downloadFile request result', error, response?.statusCode
       return callback @_createError 500, error.message if error?
       return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
       @_downloadFileFromStorage {uri: body.DownloadUrl}, (error, data) =>
@@ -204,23 +213,26 @@ class SharefileService
     autoFileName = linkDownload.getLinkInfo(link).fileName
     fileName ?= autoFileName
 
-    stream = linkDownload.stream {link}
+    stream = linkDownload.stream({link})
       .on 'response', (response) =>
+        callback null, @_createResponse {statusCode: 201}, {uploading: true, background: true}
         fileSize = parseInt response.headers['content-length']
         chunker = new WritableChunk {@requestChunkUri,fileSize,fileName,itemId}
-        stream.pipe chunker
-          .on 'error', (error) =>
-            return callback @_createError error.code, error.message if error?
-          .on 'finish', =>
-            debug 'FinishUri', chunker.FinishUri
-            request.get chunker.FinishUri, json: true, (error, response, body) =>
-              return callback @_createError 500, error.message if error?
-              callback null, @_createResponse {statusCode: 201}, success: true
+        stream.pipe(chunker).on 'finish', =>
+          @_finishChunking chunker.FinishUri
 
   transferLinkFileByPath: ({path,link,fileName}, callback) =>
     @getItemByPath {path}, (error, result) =>
       return callback error if error?
       @transferLinkFileById {itemId: result.body.id,link,fileName}, callback
+
+  _finishChunking: (uri, callback=->) =>
+    debug 'finish chunking uri', uri
+    request.get uri, json: true, (error, response, body) =>
+      debug 'finish chunking result', error, response?.statusCode, body
+      return callback error if error?
+      return callback new Error "Invalid statusCode #{response.statusCode}" if response.statusCode > 299
+      callback null
 
   _downloadFileFromStorage: ({uri}, callback) =>
     debug 'downloading file from storage', uri

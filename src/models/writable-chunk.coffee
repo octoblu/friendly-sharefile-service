@@ -1,9 +1,8 @@
 {Writable} = require 'stream'
-crypto     = require 'crypto'
-url        = require 'url'
 request    = require 'request'
 async      = require 'async'
 debug      = require('debug')('friendly-sharefile-service:writablechunk')
+ChunkUriParser = require './chunk-uri-parser'
 
 class WritableChunk extends Writable
   constructor: ({@itemId,@fileName,@fileSize,@requestChunkUri}) ->
@@ -21,27 +20,17 @@ class WritableChunk extends Writable
   _write: (chunk, encoding, callback) =>
     @_requestChunkUri (error) =>
       return callback error if error?
-      urlObj = url.parse @ChunkUri, true
+      isLast = (@byteOffset + chunk.length) == @fileSize
 
-      delete urlObj.search
-      urlObj.query.hash = @_md5 chunk
-      urlObj.query.byteOffset = @byteOffset
-      urlObj.query.index = @index
+      debug 'if final chunk', isLast, {@byteOffset, @fileSize}
+      uri = ChunkUriParser.parse {uri:@ChunkUri,chunk,@byteOffset,@index,isLast}
 
       @byteOffset += chunk.length
       @index++
 
-      isLast = @byteOffset == @fileSize
-      urlObj.query.finish = isLast
-      debug 'if final chunk', isLast, {@byteOffset, @fileSize}
-      options =
-        body: chunk
-
-      uri = url.format urlObj
-
       retryOptions = {times: 3,interval:100}
-      _makeRequest = async.apply @_makeRequest, uri, options
-      async.retry retryOptions, _makeRequest, callback
+      makeRequest = async.apply @_makeRequest, uri, body: chunk
+      async.retry retryOptions, makeRequest, callback
 
   _makeRequest: (uri, options, callback) =>
     debug 'post to chunk', uri
@@ -50,8 +39,5 @@ class WritableChunk extends Writable
       return callback code: 500, message: error.message if error?
       return callback code: response.statusCode, message: 'Bad Chunk Upload' if response.statusCode > 299
       callback()
-
-  _md5: (str) =>
-    crypto.createHash('md5').update(str).digest('hex')
 
 module.exports = WritableChunk
