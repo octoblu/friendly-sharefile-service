@@ -11,6 +11,7 @@ class LinkDownload
       callback null, body, fileName
 
   _getLinkInfo: (link) =>
+    return @_getDefaultLinkInfo link if link.indexOf("dropboxusercontent.com") >= 0
     return @_getDropboxLinkInfo link if link.indexOf("dropbox") >= 0
     @_getDefaultLinkInfo link
 
