@@ -3,14 +3,18 @@ url     = require 'url'
 request = require 'request'
 
 class LinkDownload
+  stream: ({link}) =>
+    {link} = @getLinkInfo link
+    return request.get link
+
   download: ({link}, callback) =>
-    {link,fileName} = @_getLinkInfo link
+    {link,fileName} = @getLinkInfo link
     request.get link, (error, response, body) =>
       return callback error if error?
       return callback new Error('Invalid Response') if response.statusCode > 299
       callback null, body, fileName
 
-  _getLinkInfo: (link) =>
+  getLinkInfo: (link) =>
     return @_getDefaultLinkInfo link if link.indexOf("dropboxusercontent.com") >= 0
     return @_getDropboxLinkInfo link if link.indexOf("dropbox") >= 0
     @_getDefaultLinkInfo link

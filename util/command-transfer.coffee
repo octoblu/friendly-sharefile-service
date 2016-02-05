@@ -14,13 +14,13 @@ class TransferCommand
 
   transferLinkFileById: =>
     sharefileService = new ShareFileService {@token, @sharefileDomain}
-    sharefileService.transferLinkFileById {@link, @itemId}, (error, result) =>
+    sharefileService.transferLinkFileById {@link, @itemId, @fileName}, (error, result) =>
       return console.log colors.red "Error: #{error.message}" if error?
       console.log JSON.stringify result.body, null, 2
 
   transferLinkFileByPath: =>
     sharefileService = new ShareFileService {@token, @sharefileDomain}
-    sharefileService.transferLinkFileByPath {@link, @path}, (error, result) =>
+    sharefileService.transferLinkFileByPath {@link, @path,@fileName}, (error, result) =>
       return console.log colors.red "Error: #{error.message}" if error?
       console.log JSON.stringify result.body, null, 2
 
@@ -31,14 +31,15 @@ class TransferCommand
       .option '-i, --id <itemId>', 'The target folder itemId (must have either itemId or path)'
       .option '-p, --path <path>', 'The target folder path (must have either itemId or path)'
       .option '-l, --link <link>', 'Shared link to transfer to Sharefile'
+      .option '-f, --fileName <fileName.txt>', 'File name with extension (optional)'
       .parse process.argv
 
-    @filename = _.first commander.args
     @sharefileDomain = commander.Domain
     @token = commander.token
     @path = commander.path
     @itemId = commander.id
     @link = commander.link
+    @fileName = commander.fileName
 
     unless @sharefileDomain? and @token? and @link?
       commander.outputHelp()

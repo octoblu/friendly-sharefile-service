@@ -21,14 +21,16 @@ class UploadCommand
   uploadFileById: =>
     sharefileService = new ShareFileService {@token, @sharefileDomain}
     fileName = path.basename @filename
-    sharefileService.uploadFileById {fileName, @title, @description, @batchId, @batchLast, @itemId}, @getFileData(), (error, result) =>
+    fileData = @getFileData()
+    sharefileService.uploadFileById {fileName,fileSize:fileData.length, @title, @description, @itemId}, fileData, (error, result) =>
       return console.log colors.red "Error: #{error.message}" if error?
       console.log JSON.stringify result.body, null, 2
 
   uploadFileByPath: =>
     sharefileService = new ShareFileService {@token, @sharefileDomain}
     fileName = path.basename @filename
-    sharefileService.uploadFileByPath {fileName, @title, @description, @batchId, @batchLast, @path}, @getFileData(), (error, result) =>
+    fileData = @getFileData()
+    sharefileService.uploadFileByPath {fileName,fileSize:fileData.length, @title, @description, @path}, fileData, (error, result) =>
       return console.log colors.red "Error: #{error.message}" if error?
       console.log JSON.stringify result.body, null, 2
 
@@ -38,8 +40,6 @@ class UploadCommand
       .option '-t, --token <token>', 'The token for Sharefile'
       .option '-i, --id <itemId>', 'The target folder itemId (must have either itemId or path)'
       .option '-p, --path <path>', 'The target folder path (must have either itemId or path)'
-      .option '-b, --batchId <batchId>', 'The upload batchId (optional)'
-      .option '-l, --batchLast', 'If set this will be the end of the upload'
       .option '-t, --title <title>', 'The file title (optional)'
       .option '--desciption <desciption>', 'The file desciption (optional)'
       .usage '[options] path/to/file'

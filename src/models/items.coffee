@@ -35,7 +35,9 @@ class Items
     friendlyPaths = _.compact friendlyPaths
     "/#{friendlyPaths.join('/')}"
 
-  @GetPathSegments: (path) =>
+  @GetPathSegments: (path='/') =>
+    path = _.trim(path)
+    path = _.trimEnd path, '/' unless path == '/'
     pathSegements = path.split('/')
     pathSegements = _.without pathSegements, 'root'
     pathSegements = _.tail pathSegements

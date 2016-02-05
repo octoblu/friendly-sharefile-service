@@ -1,9 +1,9 @@
 _       = require 'lodash'
 Items   = require '../models/items'
 LinkDownload = require '../models/link-download'
+WritableChunk = require '../models/writable-chunk'
 debug   = require('debug')('friendly-sharefile-service:service')
 request = require 'request'
-async   = require 'async'
 
 class SharefileService
   constructor: ({@sharefileDomain,@token}) ->
@@ -20,15 +20,11 @@ class SharefileService
       callback null, @_createResponse response, body.value
 
   getMetadataByPath: ({path}, callback) =>
-    return callback @_createError 422, "Missing path" unless path?
-
     @getItemByPath {path}, (error, result) =>
       return callback error if error?
       @getMetadataById {itemId: result.body.id}, callback
 
   shareByPath: ({title, email, path}, callback) =>
-    return callback @_createError 422, "Missing path" unless path?
-
     @getItemByPath {path}, (error, result) =>
       return callback error if error?
       @shareById {title, email, itemId: result.body.id}, callback
@@ -76,8 +72,6 @@ class SharefileService
       callback null, @_createResponse response, items.convert()
 
   getChildrenByPath: ({path}, callback) =>
-    return callback @_createError 422, "Missing path" unless path?
-
     @getItemByPath {path}, (error, result) =>
       return callback error if error?
       @getChildrenById {itemId: result.body.id}, callback
@@ -101,8 +95,6 @@ class SharefileService
       callback null, @_createResponse response, items.convert()
 
   getTreeViewByPath: ({path}, callback) =>
-    return callback @_createError 422, "Missing path" unless path?
-
     @getItemByPath {path}, (error, result) =>
       return callback error if error?
       @getTreeViewById {itemId: result.body.id}, callback
@@ -131,6 +123,8 @@ class SharefileService
       callback null, @_createResponse response, Items.ConvertRaw(body)
 
   getItemByPath: ({path}, callback) =>
+    return callback @_createError 422, "Missing path" unless path?
+    return callback @_createError 422, "Invalid Path" unless path.indexOf('/') >= 0
     # Home folder is first, so skip it
     segments = _.tail Items.GetPathSegments path
     @getHomeFolder (error, result) =>
@@ -149,34 +143,40 @@ class SharefileService
       item.path = path
       @getItemForPathSegment {item, segments: _.tail(segments), path}, callback
 
-  uploadFileById: ({itemId, fileName, title, description, batchId, batchLast}, fileData, callback) =>
+  requestChunkUri: ({itemId, fileName, title, description, fileSize}, callback) =>
+    return callback @_createError 422, 'Empty Content' unless fileSize
     options = @_getRequestOptions()
     options.uri = "/Items(#{itemId})/Upload"
     options.qs =
-      method: 'standard'
+      method: 'threaded'
       raw: true
       fileName: fileName
-      batchId: batchId
-      batchLast: batchLast
+      fileSize: fileSize
       title: title ? fileName
       details: description ? "#{fileName} description"
       notify: true
+      overwrite: true
 
     debug 'uploadFileById request options', options
     request.post options, (error, response, body) =>
       debug 'uploadFileById request result', error, response?.statusCode, body
       return callback @_createError 500, error.message if error?
       return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
-      @_postToChuckUri {uri: body.ChunkUri}, fileData, (error) =>
-        return callback error if error?
-        callback null, @_createResponse response, success: true
+      callback null, ChunkUri: body.ChunkUri, FinishUri: body.FinishUri
 
-  uploadFileByPath: ({fileName, title, description, batchId, batchLast, path}, fileData, callback) =>
-    return callback @_createError 422, "Missing path" unless path?
+  uploadFileById: ({fileName, title, description, itemId}, fileData, callback) =>
+    fileData = JSON.stringify fileData, null, 2 if _.isPlainObject fileData
+    @requestChunkUri {itemId, fileName, title, description, fileSize: fileData.length}, (error, result) =>
+      return callback error if error?
+      request.post result.ChunkUri, body: fileData, (error, response, body) =>
+        return callback @_createError 500, error.message if error?
+        return callback @_createError response.statusCode, body if response.statusCode > 299
+        callback null, @_createResponse {statusCode: 201}, success: true
 
+  uploadFileByPath: ({fileName, title, description, path}, fileData, callback) =>
     @getItemByPath {path}, (error, result) =>
       return callback error if error?
-      @uploadFileById {fileName, title, description, batchId, batchLast,itemId: result.body.id}, fileData, callback
+      @uploadFileById {fileName, title, description,itemId: result.body.id}, fileData, callback
 
   downloadFileById: ({itemId}, callback) =>
     options = @_getRequestOptions()
@@ -195,22 +195,29 @@ class SharefileService
         callback null, @_createResponse statusCode: 200, data
 
   downloadFileByPath: ({path}, callback) =>
-    return callback @_createError 422, "Missing path" unless path?
-
     @getItemByPath {path}, (error, result) =>
       return callback error if error?
       @downloadFileById {itemId: result.body.id}, callback
 
   transferLinkFileById: ({itemId,link,fileName}, callback) =>
     linkDownload = new LinkDownload()
-    linkDownload.download {link}, (error, fileData, autoFileName) =>
-      return callback @_createError 400, error.message if error?
-      fileName ?= autoFileName
-      @uploadFileById {itemId, fileName}, fileData, callback
+    autoFileName = linkDownload.getLinkInfo(link).fileName
+    fileName ?= autoFileName
+
+    stream = linkDownload.stream {link}
+      .on 'response', (response) =>
+        fileSize = parseInt response.headers['content-length']
+        chunker = new WritableChunk {@requestChunkUri,fileSize,fileName,itemId}
+        stream.pipe chunker
+          .on 'error', (error) =>
+            return callback @_createError error.code, error.message if error?
+          .on 'finish', =>
+            debug 'FinishUri', chunker.FinishUri
+            request.get chunker.FinishUri, json: true, (error, response, body) =>
+              return callback @_createError 500, error.message if error?
+              callback null, @_createResponse {statusCode: 201}, success: true
 
   transferLinkFileByPath: ({path,link,fileName}, callback) =>
-    return callback @_createError 422, "Missing path" unless path?
-
     @getItemByPath {path}, (error, result) =>
       return callback error if error?
       @transferLinkFileById {itemId: result.body.id,link,fileName}, callback
@@ -221,17 +228,6 @@ class SharefileService
       return callback @_createError 500, error.message if error?
       return callback @_createError response.statusCode, body?.message?.value if response.statusCode > 299
       callback null, body
-
-  _postToChuckUri: ({uri}, fileData, callback) =>
-    options =
-      body: fileData
-
-    debug 'post to chunk options', options
-    request.post uri, options, (error, response, body) =>
-      debug 'post to chuck result', error, response?.statusCode, body
-      return callback @_createError 500, error.message if error?
-      return callback @_createError response.statusCode, body if response.statusCode > 299
-      return callback null
 
   _getRequestOptions: =>
     return {

@@ -22,8 +22,8 @@ class Server
     app.use cors()
     app.use errorHandler()
     app.use meshbluHealthcheck()
-    app.use bodyParser.urlencoded limit: '1mb', extended : true
-    app.use bodyParser.json limit : '1mb'
+    app.use bodyParser.urlencoded limit: '50mb', extended : true
+    app.use bodyParser.json limit : '50mb'
     app.use bearerToken()
 
     app.options '*', cors()

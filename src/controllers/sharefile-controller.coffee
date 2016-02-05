@@ -75,17 +75,17 @@ class SharefileController
 
   uploadFileById: (request, response) =>
     {itemId} = request.params
-    {fileName,title,description,batchId,batchLast,contents} = request.query
+    {fileName,title,description,contents} = request.query
 
-    @_getShareFileService(request).uploadFileById {itemId,fileName,title,description,batchId,batchLast}, contents, (error, result) =>
+    @_getShareFileService(request).uploadFileById {itemId,fileName,title,description}, contents, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
   uploadFileByPath: (request, response) =>
     {path} = request.query
-    {fileName,title,description,batchId,batchLast,contents} = request.body
+    {fileName,title,description,contents} = request.body
 
-    @_getShareFileService(request).uploadFileByPath {path,fileName,title,description,batchId,batchLast}, contents, (error, result) =>
+    @_getShareFileService(request).uploadFileByPath {path,fileName,title,description}, contents, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
