@@ -28,11 +28,6 @@ class SharefileController
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
-  list: (request, response) =>
-    @_getShareFileService(request).list (error, result) =>
-      return response.status(error.code || 500).send(error: error.message) if error?
-      response.status(result.code).send result.body
-
   shareById: (request, response) =>
     {itemId} = request.params
     {email, title} = request.body

@@ -107,13 +107,6 @@ class SharefileService
       return callback error if error?
       @getTreeViewById {itemId: result.body.id}, callback
 
-  list: (callback) =>
-    items = new Items()
-    @getChildrenById {itemId:'home'}, (error, result) =>
-      return callback error if error?
-      items.addSet result.body
-      return callback null, @_createResponse statusCode: 200, items.convert()
-
   getItemById: ({itemId}, callback) =>
     options = @_getRequestOptions()
     options.uri = "/Items(#{itemId})"
@@ -151,7 +144,6 @@ class SharefileService
     @getChildrenById {itemId: item.id}, (error, result) =>
       return callback error if error
       item = _.find result.body, name: currentSegment
-      console.log 'item', item, currentSegment, _.map(result.body, 'id')
       return callback @_createError 404, 'Item not found' unless item?
       # Or be recursive
       item.path = path

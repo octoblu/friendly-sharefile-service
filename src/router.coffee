@@ -4,7 +4,6 @@ class Router
   route: (app) =>
     sharefileController = new SharefileController {}
 
-    app.get '/:domain/items', sharefileController.list
     app.get '/:domain/home/folder', sharefileController.getHomeFolder
 
     # By Path

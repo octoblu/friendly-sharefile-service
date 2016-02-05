@@ -15,7 +15,6 @@ class Command
       .version packageJSON.version
       .command 'download', 'download file'
       .command 'get-item', 'get item from path'
-      .command 'list',     'list files'
       .command 'metadata', 'get metadata'
       .command 'share',    'share file'
       .command 'transfer', 'transfer file'
