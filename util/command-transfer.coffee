@@ -1,28 +1,53 @@
 _                = require 'lodash'
 commander        = require 'commander'
 colors           = require 'colors'
+MeshbluConfig    = require 'meshblu-config'
+JobManager       = require 'meshblu-core-job-manager'
+RedisNS          = require '@octoblu/redis-ns'
+redis            = require 'fakeredis'
+uuid             = require 'uuid'
 ShareFileService = require '../index.js'
 
 class TransferCommand
   run: =>
+    @redisKey = uuid.v1()
     @parseOptions()
-    @transferFile()
+    @initiateTransfer()
+    client = new RedisNS 'friendly-sharefile-service', redis.createClient @redisKey
+    jobManager = new JobManager client: client, timeoutSeconds: 45
+    jobManager.getRequest ['request'], (error, result) =>
+      return console.error error if error?
+      return console.log 'timed out' unless result?
+      @transferLinkFile result
 
-  transferFile: =>
-    @transferLinkFileByPath() if @path?
-    @transferLinkFileById() if @itemId?
+  initiateTransfer: =>
+    @initiateTransferByPath() if @path?
+    @initiateTransferById() if @itemId?
 
-  transferLinkFileById: =>
-    sharefileService = new ShareFileService {@token, @sharefileDomain}
-    sharefileService.transferLinkFileById {@link, @itemId, @fileName}, (error, result) =>
+  initiateTransferById: =>
+    @_getSharefileService().initiateTransferById {@link, @itemId, @fileName}, (error, result) =>
       return console.log colors.red "Error: #{error.message}" if error?
       console.log JSON.stringify result.body, null, 2
 
-  transferLinkFileByPath: =>
-    sharefileService = new ShareFileService {@token, @sharefileDomain}
-    sharefileService.transferLinkFileByPath {@link, @path,@fileName}, (error, result) =>
+  initiateTransferByPath: =>
+    @_getSharefileService().initiateTransferByPath {@link, @path,@fileName}, (error, result) =>
       return console.log colors.red "Error: #{error.message}" if error?
       console.log JSON.stringify result.body, null, 2
+
+  transferLinkFile: ({metadata}) =>
+    {statusDevice,link,fileName,itemId} = metadata
+    @transferLinkFileById({statusDevice,link,fileName,itemId})
+
+  transferLinkFileById: ({statusDevice,link,fileName,itemId}) =>
+    @_getSharefileService().transferLinkFileById {statusDevice,link,fileName,itemId}, (error, result) =>
+      return console.log colors.red "Error: #{error.message}" if error?
+      console.log JSON.stringify result.body, null, 2
+
+  _getSharefileService: =>
+    client = new RedisNS 'friendly-sharefile-service', redis.createClient @redisKey
+    jobManager = new JobManager client: client, timeoutSeconds: 45
+    meshbluConfig = new MeshbluConfig filename: @filename
+    sharefileService = new ShareFileService {@token, @sharefileDomain,jobManager,meshbluConfig}
 
   parseOptions: =>
     commander
@@ -32,8 +57,10 @@ class TransferCommand
       .option '-p, --path <path>', 'The target folder path (must have either itemId or path)'
       .option '-l, --link <link>', 'Shared link to transfer to Sharefile'
       .option '-f, --fileName <fileName.txt>', 'File name with extension (optional)'
+      .usage '[options] path/to/meshblu.json'
       .parse process.argv
 
+    @filename = _.first commander.args
     @sharefileDomain = commander.Domain
     @token = commander.token
     @path = commander.path

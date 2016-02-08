@@ -1,8 +1,10 @@
 SharefileController = require './controllers/sharefile-controller'
 
 class Router
+  constructor: ({@meshbluConfig,@jobManager}) ->
+
   route: (app) =>
-    sharefileController = new SharefileController {}
+    sharefileController = new SharefileController {@meshbluConfig,@jobManager}
 
     app.get '/:domain/home/folder', sharefileController.getHomeFolder
 
@@ -14,7 +16,7 @@ class Router
     app.get '/:domain/items-by-path/download', sharefileController.downloadFileByPath
     app.post '/:domain/items-by-path/share', sharefileController.shareByPath
     app.post '/:domain/items-by-path/upload', sharefileController.uploadFileByPath
-    app.post '/:domain/items-by-path/transfer/link', sharefileController.transferLinkFileByPath
+    app.post '/:domain/items-by-path/transfer/link', sharefileController.initiateTransferByPath
 
     # By Id
     app.get '/:domain/items/:itemId', sharefileController.getItemById
@@ -24,7 +26,7 @@ class Router
     app.get '/:domain/items/:itemId/download', sharefileController.downloadFileById
     app.post '/:domain/items/:itemId/share', sharefileController.shareById
     app.post '/:domain/items/:itemId/upload', sharefileController.uploadFileById
-    app.post '/:domain/items/:itemId/transfer/link', sharefileController.transferLinkFileById
+    app.post '/:domain/items/:itemId/transfer/link', sharefileController.initiateTransferById
 
 
     # Still needs webhooks from ShareFile

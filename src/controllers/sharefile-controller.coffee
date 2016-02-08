@@ -1,6 +1,8 @@
 SharefileService   = require '../services/sharefile-service'
 
 class SharefileController
+  constructor: ({@meshbluConfig,@jobManager}) ->
+
   getMetadataById: (request, response) =>
     {itemId} = request.params
     @_getShareFileService(request).getMetadataById {itemId}, (error, result) =>
@@ -101,25 +103,25 @@ class SharefileController
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
-  transferLinkFileById: (request, response) =>
+  initiateTransferById: (request, response) =>
     {itemId} = request.params
     {link,fileName} = request.body
 
-    @_getShareFileService(request).transferLinkFileById {itemId,fileName,link}, (error, result) =>
+    @_getShareFileService(request).initiateTransferById {itemId,fileName,link}, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
-  transferLinkFileByPath: (request, response) =>
+  initiateTransferById: (request, response) =>
     {path} = request.query
     {link,fileName} = request.body
 
-    @_getShareFileService(request).transferLinkFileByPath {path,fileName,link}, (error, result) =>
+    @_getShareFileService(request).initiateTransferById {path,fileName,link}, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
   _getShareFileService: (request) =>
     {token} = request
     sharefileDomain = request.params.domain
-    new SharefileService {token, sharefileDomain}
+    new SharefileService {token, sharefileDomain,@jobManager,@meshbluConfig}
 
 module.exports = SharefileController

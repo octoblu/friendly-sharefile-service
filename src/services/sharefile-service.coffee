@@ -1,13 +1,14 @@
-_       = require 'lodash'
-Items   = require '../models/items'
-LinkDownload = require '../models/link-download'
-WritableChunk = require '../models/writable-chunk'
+_              = require 'lodash'
+Items          = require '../models/items'
+LinkDownload   = require '../models/link-download'
+WritableChunk  = require '../models/writable-chunk'
 ChunkUriParser = require '../models/chunk-uri-parser'
-debug   = require('debug')('friendly-sharefile-service:service')
-request = require 'request'
+StatusDevice   = require '../models/status-device'
+debug          = require('debug')('friendly-sharefile-service:service')
+request        = require 'request'
 
 class SharefileService
-  constructor: ({@sharefileDomain,@token}) ->
+  constructor: ({@sharefileDomain,@token,@jobManager,@meshbluConfig}) ->
 
   getMetadataById: ({itemId}, callback) =>
     options = @_getRequestOptions()
@@ -208,18 +209,45 @@ class SharefileService
       return callback error if error?
       @downloadFileById {itemId: result.body.id}, callback
 
-  transferLinkFileById: ({itemId,link,fileName}, callback) =>
+
+  initiateTransferById: ({itemId,link,fileName}, callback) =>
     linkDownload = new LinkDownload()
     autoFileName = linkDownload.getLinkInfo(link).fileName
     fileName ?= autoFileName
+    @statusDevice = new StatusDevice {@meshbluConfig}
+    @statusDevice.create {}, (error, device) =>
+      return callback @_createError 500, error.message if error?
+      message =
+        metadata:
+          statusDevice: _.pick device, 'uuid', 'token'
+          link: link
+          fileName: fileName
+          itemId: itemId
+        data: {}
+      @jobManager.createRequest 'request', message, (error) =>
+        return callback @_createError 500, error.message if error?
+        response =
+          uploading: true
+          background: true
+          statusDevice:
+            uuid: device.uuid
+        callback null, @_createResponse {statusCode: 201}, response
 
+  initiateTransferByPath: ({path,link,fileName}, callback) =>
+    @getItemByPath {path}, (error, result) =>
+      return callback error if error?
+      @initiateTransferById {itemId: result.body.id,link,fileName}, callback
+
+  transferLinkFileById: ({statusDevice,itemId,link,fileName}, callback) =>
+    linkDownload = new LinkDownload()
     stream = linkDownload.stream({link})
       .on 'response', (response) =>
-        callback null, @_createResponse {statusCode: 201}, {uploading: true, background: true}
         fileSize = parseInt response.headers['content-length']
         chunker = new WritableChunk {@requestChunkUri,fileSize,fileName,itemId}
         stream.pipe(chunker).on 'finish', =>
-          @_finishChunking chunker.FinishUri
+          @_finishChunking chunker.FinishUri, (error) =>
+            return callback @_createError 500, error.message if error?
+            callback null, {success:true}
 
   transferLinkFileByPath: ({path,link,fileName}, callback) =>
     @getItemByPath {path}, (error, result) =>

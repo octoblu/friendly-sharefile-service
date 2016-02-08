@@ -11,7 +11,7 @@ debug              = require('debug')('friendly-sharefile-service:server')
 Router             = require './router'
 
 class Server
-  constructor: ({@disableLogging, @port}, {})->
+  constructor: ({@disableLogging, @port}, {@meshbluConfig,@jobManager})->
 
   address: =>
     @server.address()
@@ -28,7 +28,7 @@ class Server
 
     app.options '*', cors()
 
-    router = new Router {}
+    router = new Router {@meshbluConfig,@jobManager}
 
     router.route app
 
