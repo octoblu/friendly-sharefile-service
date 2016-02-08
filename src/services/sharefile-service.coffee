@@ -105,6 +105,9 @@ class SharefileService
           uploading: true
           background: true
           statusDevice: deviceConfig
+          monitor:
+            description: 'Go to the link below to watch the status of your files being transfered'
+            url: 'http://progress-monitor.octoblu.com'
         callback null, @_createResponse 201, response
 
   _do: (jobType, options, data, callback) =>
