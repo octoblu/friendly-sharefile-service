@@ -105,17 +105,18 @@ class SharefileController
 
   initiateTransferById: (request, response) =>
     {itemId} = request.params
+    {uuid} = request.query
     {link,fileName} = request.body
 
-    @_getShareFileService(request).initiateTransfer {itemId,fileName,link}, (error, result) =>
+    @_getShareFileService(request).initiateTransfer {itemId,uuid,fileName,link}, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
   initiateTransferByPath: (request, response) =>
-    {path} = request.query
+    {path,uuid} = request.query
     {link,fileName} = request.body
 
-    @_getShareFileService(request).initiateTransfer {path,fileName,link}, (error, result) =>
+    @_getShareFileService(request).initiateTransfer {path,uuid,fileName,link}, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 

@@ -77,9 +77,9 @@ class SharefileService
       body = JSON.parse response.rawData
       callback null, @_createResponse code, body
 
-  initiateTransfer: ({itemId,path,link,fileName}, callback) =>
+  initiateTransfer: ({itemId,uuid,path,link,fileName}, callback) =>
     statusDevice = new StatusDevice {@meshbluConfig}
-    statusDevice.create {}, (error, device) =>
+    statusDevice.create {link,uuid}, (error, device) =>
       return callback @_createError 500, error.message if error?
       deviceConfig = _.cloneDeep @meshbluConfig
       deviceConfig.uuid = device.uuid

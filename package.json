@@ -1,6 +1,6 @@
 {
   "name": "friendly-sharefile-service",
-  "version": "7.0.1",
+  "version": "7.1.0",
   "description": "Put some description here",
   "keywords": [],
   "homepage": "https://github.com/octoblu/friendly-sharefile-service",
@@ -43,7 +43,7 @@
     "express-meshblu-auth": "^2.0.0",
     "express-meshblu-healthcheck": "^1.0.1",
     "fakeredis": "^1.0.2",
-    "friendly-sharefile": "^3.1.0",
+    "friendly-sharefile": "^3.3.0",
     "lodash": "^4.0.0",
     "meshblu-config": "^3.1.1",
     "meshblu-core-job-manager": "^3.1.9",
