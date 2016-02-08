@@ -5,28 +5,28 @@ class SharefileController
 
   getMetadataById: (request, response) =>
     {itemId} = request.params
-    @_getShareFileService(request).getMetadataById {itemId}, (error, result) =>
+    @_getShareFileService(request).getMetadata {itemId}, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
   getMetadataByPath: (request, response) =>
     {path} = request.query
 
-    @_getShareFileService(request).getMetadataByPath {path}, (error, result) =>
+    @_getShareFileService(request).getMetadata {path}, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
   getItemById: (request, response) =>
     {itemId} = request.params
 
-    @_getShareFileService(request).getItemById {itemId}, (error, result) =>
+    @_getShareFileService(request).getItem {itemId}, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
   getItemByPath: (request, response) =>
     {path} = request.query
 
-    @_getShareFileService(request).getItemByPath {path}, (error, result) =>
+    @_getShareFileService(request).getItem {path}, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
@@ -34,7 +34,7 @@ class SharefileController
     {itemId} = request.params
     {email, title} = request.body
 
-    @_getShareFileService(request).shareById {itemId, email, title}, (error, result) =>
+    @_getShareFileService(request).share {itemId, email, title}, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
@@ -42,7 +42,7 @@ class SharefileController
     {path} = request.query
     {email, title} = request.body
 
-    @_getShareFileService(request).shareByPath {path, email, title}, (error, result) =>
+    @_getShareFileService(request).share {path, email, title}, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
@@ -53,25 +53,25 @@ class SharefileController
 
   getTreeViewById: (request, response) =>
     {itemId} = request.params
-    @_getShareFileService(request).getTreeViewById {itemId}, (error, result) =>
+    @_getShareFileService(request).getTreeView {itemId}, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
   getTreeViewByPath: (request, response) =>
     {path} = request.query
-    @_getShareFileService(request).getTreeViewByPath {path}, (error, result) =>
+    @_getShareFileService(request).getTreeView {path}, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
   getChildrenById: (request, response) =>
     {itemId} = request.params
-    @_getShareFileService(request).getChildrenById {itemId}, (error, result) =>
+    @_getShareFileService(request).getChildren {itemId}, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
   getChildrenByPath: (request, response) =>
     {path} = request.query
-    @_getShareFileService(request).getChildrenByPath {path}, (error, result) =>
+    @_getShareFileService(request).getChildren {path}, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
@@ -79,7 +79,7 @@ class SharefileController
     {itemId} = request.params
     {fileName,title,description,contents} = request.query
 
-    @_getShareFileService(request).uploadFileById {itemId,fileName,title,description}, contents, (error, result) =>
+    @_getShareFileService(request).uploadFile {itemId,fileName,title,description}, contents, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
@@ -87,19 +87,19 @@ class SharefileController
     {path} = request.query
     {fileName,title,description,contents} = request.body
 
-    @_getShareFileService(request).uploadFileByPath {path,fileName,title,description}, contents, (error, result) =>
+    @_getShareFileService(request).uploadFile {path,fileName,title,description}, contents, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
   downloadFileById: (request, response) =>
     {itemId} = request.params
-    @_getShareFileService(request).downloadFileById {itemId}, (error, result) =>
+    @_getShareFileService(request).downloadFile {itemId}, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
   downloadFileByPath: (request, response) =>
     {path} = request.query
-    @_getShareFileService(request).downloadFileByPath {path}, (error, result) =>
+    @_getShareFileService(request).downloadFile {path}, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
@@ -107,15 +107,15 @@ class SharefileController
     {itemId} = request.params
     {link,fileName} = request.body
 
-    @_getShareFileService(request).initiateTransferById {itemId,fileName,link}, (error, result) =>
+    @_getShareFileService(request).initiateTransfer {itemId,fileName,link}, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 
-  initiateTransferById: (request, response) =>
+  initiateTransferByPath: (request, response) =>
     {path} = request.query
     {link,fileName} = request.body
 
-    @_getShareFileService(request).initiateTransferById {path,fileName,link}, (error, result) =>
+    @_getShareFileService(request).initiateTransfer {path,fileName,link}, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
       response.status(result.code).send result.body
 

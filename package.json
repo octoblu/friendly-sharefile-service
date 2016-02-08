@@ -18,15 +18,6 @@
     "start": "node command.js",
     "test": "istanbul cover _mocha -- -R spec --require coffee-coverage/register-istanbul"
   },
-  "bin": {
-    "sharefile-util": "./util/command.js",
-    "sharefile-util-download": "./util/command-download.js",
-    "sharefile-util-get-item": "./util/command-get-item.js",
-    "sharefile-util-metadata": "./util/command-metadata.js",
-    "sharefile-util-share": "./util/command-share.js",
-    "sharefile-util-transfer": "./util/command-transfer.js",
-    "sharefile-util-upload": "./util/command-upload.js"
-  },
   "devDependencies": {
     "@octoblu/shmock": "^0.7.2",
     "chai": "^3.5.0",
@@ -42,11 +33,8 @@
   },
   "dependencies": {
     "@octoblu/redis-ns": "^1.2.0",
-    "async": "^1.5.2",
     "body-parser": "^1.14.1",
     "coffee-script": "^1.10.0",
-    "colors": "^1.1.2",
-    "commander": "^2.9.0",
     "cors": "^2.5.3",
     "debug": "^2.2.0",
     "errorhandler": "^1.4.2",
@@ -55,6 +43,7 @@
     "express-meshblu-auth": "^2.0.0",
     "express-meshblu-healthcheck": "^1.0.1",
     "fakeredis": "^1.0.2",
+    "friendly-sharefile": "^1.0.1",
     "lodash": "^4.0.0",
     "meshblu-config": "^3.1.1",
     "meshblu-core-job-manager": "^3.1.9",
