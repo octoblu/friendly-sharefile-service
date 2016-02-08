@@ -104,8 +104,7 @@ class SharefileService
         response =
           uploading: true
           background: true
-          statusDevice:
-            uuid: device.uuid
+          statusDevice: deviceConfig
         callback null, @_createResponse 201, response
 
   _do: (jobType, options, data, callback) =>
