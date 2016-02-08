@@ -10,8 +10,8 @@ class SharefileService
     jobType = 'getMetadataByPath' if path?
     @_do jobType, {itemId,path}, {}, (error, response) =>
       return callback @_createError 500, error.message if error?
-      {code} = result.metadata
-      body = JSON.parse result.rawData
+      {code} = response.metadata
+      body = JSON.parse response.rawData
       callback null, @_createResponse code, body
 
   getItem: ({itemId,path}, callback) =>
@@ -20,8 +20,8 @@ class SharefileService
 
     @_do jobType, {itemId,path}, {}, (error, response) =>
       return callback @_createError 500, error.message if error?
-      {code} = result.metadata
-      body = JSON.parse result.rawData
+      {code} = response.metadata
+      body = JSON.parse response.rawData
       callback null, @_createResponse code, body
 
   share: ({itemId,path,email,title}, callback) =>
@@ -30,15 +30,15 @@ class SharefileService
 
     @_do jobType, {itemId,path,email,title}, {}, (error, response) =>
       return callback @_createError 500, error.message if error?
-      {code} = result.metadata
-      body = JSON.parse result.rawData
+      {code} = response.metadata
+      body = JSON.parse response.rawData
       callback null, @_createResponse code, body
 
   getHomeFolder: (callback) =>
     @_do 'getHomeFolder', {}, {}, (error, response) =>
       return callback @_createError 500, error.message if error?
-      {code} = result.metadata
-      body = JSON.parse result.rawData
+      {code} = response.metadata
+      body = JSON.parse response.rawData
       callback null, @_createResponse code, body
 
   getTreeView: ({itemId,path}, callback) =>
@@ -46,8 +46,8 @@ class SharefileService
     jobType = 'getTreeViewByPath' if path?
     @_do jobType, {itemId,path}, {}, (error, response) =>
       return callback @_createError 500, error.message if error?
-      {code} = result.metadata
-      body = JSON.parse result.rawData
+      {code} = response.metadata
+      body = JSON.parse response.rawData
       callback null, @_createResponse code, body
 
   getChildren: ({itemId,path}, callback) =>
@@ -55,8 +55,8 @@ class SharefileService
     jobType = 'getChildrenByPath' if path?
     @_do jobType, {itemId,path}, {}, (error, response) =>
       return callback @_createError 500, error.message if error?
-      {code} = result.metadata
-      body = JSON.parse result.rawData
+      {code} = response.metadata
+      body = JSON.parse response.rawData
       callback null, @_createResponse code, body
 
   uploadFile: ({itemId,path,fileName,title,description}, contents, callback) =>
@@ -64,8 +64,8 @@ class SharefileService
     jobType = 'uploadFileByPath' if path?
     @_do jobType, {itemId,path,fileName,title,description}, contents, (error, response) =>
       return callback @_createError 500, error.message if error?
-      {code} = result.metadata
-      body = JSON.parse result.rawData
+      {code} = response.metadata
+      body = JSON.parse response.rawData
       callback null, @_createResponse code, body
 
   downloadFile: ({itemId,path}, callback) =>
@@ -73,8 +73,8 @@ class SharefileService
     jobType = 'downloadFileByPath' if path?
     @_do jobType, {itemId,path}, (error, response) =>
       return callback @_createError 500, error.message if error?
-      {code} = result.metadata
-      body = JSON.parse result.rawData
+      {code} = response.metadata
+      body = JSON.parse response.rawData
       callback null, @_createResponse code, body
 
   initiateTransfer: ({itemId,path,link,fileName}, callback) =>
