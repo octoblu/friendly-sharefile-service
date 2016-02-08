@@ -6,21 +6,29 @@ class SharefileService
   constructor: ({@token,@sharefileDomain,@jobManager,@meshbluConfig}) ->
 
   getMetadata: ({itemId,path}, callback) =>
-    @_do 'getMetadata', {itemId,path}, {}, (error, response) =>
+    jobType = 'getMetadataById' if itemId?
+    jobType = 'getMetadataByPath' if path?
+    @_do jobType, {itemId,path}, {}, (error, response) =>
       return callback @_createError 500, error.message if error?
       {code} = result.metadata
       body = JSON.parse result.rawData
       callback null, @_createResponse code, body
 
   getItem: ({itemId,path}, callback) =>
-    @_do 'getItem', {itemId,path}, {}, (error, response) =>
+    jobType = 'getItemById' if itemId?
+    jobType = 'getItemByPath' if path?
+
+    @_do jobType, {itemId,path}, {}, (error, response) =>
       return callback @_createError 500, error.message if error?
       {code} = result.metadata
       body = JSON.parse result.rawData
       callback null, @_createResponse code, body
 
   share: ({itemId,path,email,title}, callback) =>
-    @_do 'share', {itemId,path,email,title}, {}, (error, response) =>
+    jobType = 'shareById' if itemId?
+    jobType = 'shareByPath' if path?
+
+    @_do jobType, {itemId,path,email,title}, {}, (error, response) =>
       return callback @_createError 500, error.message if error?
       {code} = result.metadata
       body = JSON.parse result.rawData
@@ -34,28 +42,36 @@ class SharefileService
       callback null, @_createResponse code, body
 
   getTreeView: ({itemId,path}, callback) =>
-    @_do 'getTreeView', {itemId,path}, {}, (error, response) =>
+    jobType = 'getTreeViewById' if itemId?
+    jobType = 'getTreeViewByPath' if path?
+    @_do jobType, {itemId,path}, {}, (error, response) =>
       return callback @_createError 500, error.message if error?
       {code} = result.metadata
       body = JSON.parse result.rawData
       callback null, @_createResponse code, body
 
   getChildren: ({itemId,path}, callback) =>
-    @_do 'getChildren', {itemId,path}, {}, (error, response) =>
+    jobType = 'getChildrenById' if itemId?
+    jobType = 'getChildrenByPath' if path?
+    @_do jobType, {itemId,path}, {}, (error, response) =>
       return callback @_createError 500, error.message if error?
       {code} = result.metadata
       body = JSON.parse result.rawData
       callback null, @_createResponse code, body
 
   uploadFile: ({itemId,path,fileName,title,description}, contents, callback) =>
-    @_do 'uploadFile', {itemId,path,fileName,title,description}, contents, (error, response) =>
+    jobType = 'uploadFileById' if itemId?
+    jobType = 'uploadFileByPath' if path?
+    @_do jobType, {itemId,path,fileName,title,description}, contents, (error, response) =>
       return callback @_createError 500, error.message if error?
       {code} = result.metadata
       body = JSON.parse result.rawData
       callback null, @_createResponse code, body
 
   downloadFile: ({itemId,path}, callback) =>
-    @_do 'downloadFile', {itemId,path}, (error, response) =>
+    jobType = 'downloadFileById' if itemId?
+    jobType = 'downloadFileByPath' if path?
+    @_do jobType, {itemId,path}, (error, response) =>
       return callback @_createError 500, error.message if error?
       {code} = result.metadata
       body = JSON.parse result.rawData
@@ -68,16 +84,20 @@ class SharefileService
       deviceConfig = _.cloneDeep @meshbluConfig
       deviceConfig.uuid = device.uuid
       deviceConfig.token = device.token
+      jobType = 'transferLinkFileById' if itemId?
+      jobType = 'transferLinkFileByPath' if path?
       message =
         metadata:
-          statusDevice: deviceConfig
           responseId: uuid.v4()
-          link: link
-          fileName: fileName
-          itemId: itemId
-          path: path
+          options:
+            statusDeviceConfig: deviceConfig
+            link: link
+            fileName: fileName
+            itemId: itemId
+            path: path
           token: @token
           domain: @sharefileDomain
+          jobType: jobType
         data: {}
       @jobManager.createRequest 'request', message, (error) =>
         return callback @_createError 500, error.message if error?
@@ -88,7 +108,9 @@ class SharefileService
             uuid: device.uuid
         callback null, @_createResponse 201, response
 
-  _do: (jobType, metadata, data, callback) =>
+  _do: (jobType, options, data, callback) =>
+    metadata = {}
+    metadata.options = options
     metadata.token = @token
     metadata.domain = @sharefileDomain
     metadata.jobType = jobType

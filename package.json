@@ -43,7 +43,7 @@
     "express-meshblu-auth": "^2.0.0",
     "express-meshblu-healthcheck": "^1.0.1",
     "fakeredis": "^1.0.2",
-    "friendly-sharefile": "^1.0.1",
+    "friendly-sharefile": "^3.1.0",
     "lodash": "^4.0.0",
     "meshblu-config": "^3.1.1",
     "meshblu-core-job-manager": "^3.1.9",

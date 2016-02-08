@@ -12,20 +12,20 @@ class Command
       disableLogging       : process.env.DISABLE_LOGGING == "true"
 
     @redisUri = process.env.REDIS_URI || 'redis://127.0.0.1:6379'
+    @namespace = process.env.NAMESPACE || 'friendly-sharefile'
+    @timeoutSeconds = parseInt process.env.TIMEOUT_SECONDS || 30
 
   panic: (error) =>
     console.error error.stack
     process.exit 1
 
   run: =>
-    return @panic new Error 'Missing enviromnent REDIS_URI' unless @redisUri?
-
     meshbluConfig = new MeshbluConfig().toJSON()
-    client = new RedisNS 'friendly-sharefile-service', redis.createClient @redisUri
+    client = new RedisNS @namespace, redis.createClient @redisUri
 
-    jobManager = new JobManager client: client, timeoutSeconds: 30
+    jobManager = new JobManager client: client, timeoutSeconds: @timeoutSeconds
     server = new Server @serverOptions, {meshbluConfig,jobManager}
-    
+
     server.run (error) =>
       return @panic error if error?
 
