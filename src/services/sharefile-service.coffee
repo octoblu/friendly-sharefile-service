@@ -1,5 +1,5 @@
 _            = require 'lodash'
-uuid         = require 'uuid'
+NodeUUID         = require 'uuid'
 StatusDevice = require 'friendly-sharefile/src/models/status-device'
 
 class SharefileService
@@ -88,7 +88,7 @@ class SharefileService
       jobType = 'transferLinkFileByPath' if path?
       message =
         metadata:
-          responseId: uuid.v4()
+          responseId: NodeUUID.v4()
           options:
             statusDeviceConfig: deviceConfig
             link: link
