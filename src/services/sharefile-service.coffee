@@ -71,7 +71,7 @@ class SharefileService
   downloadFile: ({itemId,path}, callback) =>
     jobType = 'downloadFileById' if itemId?
     jobType = 'downloadFileByPath' if path?
-    @_do jobType, {itemId,path}, (error, response) =>
+    @_do jobType, {itemId,path}, {}, (error, response) =>
       return callback @_createError 500, error.message if error?
       {code} = response.metadata
       body = JSON.parse response.rawData
