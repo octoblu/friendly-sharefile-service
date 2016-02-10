@@ -79,7 +79,7 @@ class SharefileService
 
   initiateTransfer: ({itemId,uuid,path,link,fileName}, callback) =>
     statusDevice = new StatusDevice {@meshbluConfig}
-    statusDevice.create {link,uuid}, (error, device) =>
+    statusDevice.create {link,uuid,fileName}, (error, device) =>
       return callback @_createError 500, error.message if error?
       deviceConfig = _.cloneDeep @meshbluConfig
       deviceConfig.uuid = device.uuid
