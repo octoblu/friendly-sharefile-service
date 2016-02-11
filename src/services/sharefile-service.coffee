@@ -99,7 +99,7 @@ class SharefileService
           domain: @sharefileDomain
           jobType: jobType
         data: {}
-      @jobManager.createRequest 'request', message, (error) =>
+      @jobManager.createForeverRequest 'request', message, (error) =>
         return callback @_createError 500, error.message if error?
         response =
           uploading: true

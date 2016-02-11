@@ -13,7 +13,7 @@ class Command
 
     @redisUri = process.env.REDIS_URI || 'redis://127.0.0.1:6379'
     @namespace = process.env.NAMESPACE || 'friendly-sharefile'
-    @timeoutSeconds = parseInt process.env.TIMEOUT_SECONDS || 30
+    @timeoutSeconds = parseInt process.env.TIMEOUT_SECONDS || 20
 
   panic: (error) =>
     console.error error.stack
