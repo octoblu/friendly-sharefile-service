@@ -78,6 +78,10 @@ class SharefileService
       callback null, @_createResponse code, body
 
   initiateTransfer: ({itemId,uuid,path,link,fileName}, callback) =>
+    return callback @_createError 422, 'Missing link' unless link
+    return callback @_createError 422, 'Missing fileName' unless fileName
+    return callback @_createError 422, 'Missing itemId or path' unless itemId || path
+
     statusDevice = new StatusDevice {@meshbluConfig}
     statusDevice.create {link,uuid,fileName}, (error, device) =>
       return callback @_createError 500, error.message if error?
