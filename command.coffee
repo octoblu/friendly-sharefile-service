@@ -8,8 +8,9 @@ Server        = require './src/server'
 class Command
   constructor: ->
     @serverOptions =
-      port                 : process.env.PORT || 80
-      disableLogging       : process.env.DISABLE_LOGGING == "true"
+      port           : process.env.PORT || 80
+      disableLogging : process.env.DISABLE_LOGGING == "true"
+      sentryDSN      : process.env.SENTRY_DSN
 
     @redisUri = process.env.REDIS_URI || 'redis://127.0.0.1:6379'
     @namespace = process.env.NAMESPACE || 'friendly-sharefile'

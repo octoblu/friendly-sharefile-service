@@ -1,4 +1,5 @@
 cors               = require 'cors'
+raven              = require 'raven'
 morgan             = require 'morgan'
 express            = require 'express'
 bodyParser         = require 'body-parser'
@@ -11,13 +12,15 @@ debug              = require('debug')('friendly-sharefile-service:server')
 Router             = require './router'
 
 class Server
-  constructor: ({@disableLogging, @port}, {@meshbluConfig,@jobManager})->
+  constructor: ({@disableLogging, @port,@sentryDSN}, {@meshbluConfig,@jobManager})->
 
   address: =>
     @server.address()
 
   run: (callback) =>
     app = express()
+    app.use raven.middleware.express.requestHandler @sentryDSN if @sentryDSN
+    app.use raven.middleware.express.errorHandler @sentryDSN if @sentryDSN
     app.use meshbluHealthcheck()
     app.use morgan 'dev', immediate: false unless @disableLogging
     app.use cors()

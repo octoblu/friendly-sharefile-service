@@ -8,7 +8,7 @@ describe 'Test', ->
     serverOptions =
       port: undefined,
       disableLogging: true
-
+      
     @server = new Server serverOptions, {}
 
     @server.run =>
