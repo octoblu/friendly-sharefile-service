@@ -1,6 +1,7 @@
 _             = require 'lodash'
 MeshbluConfig = require 'meshblu-config'
 JobManager    = require 'meshblu-core-job-manager'
+OctobluRaven  = require 'octoblu-raven'
 redis         = require 'redis'
 RedisNS       = require '@octoblu/redis-ns'
 Server        = require './src/server'
@@ -10,11 +11,14 @@ class Command
     @serverOptions =
       port           : process.env.PORT || 80
       disableLogging : process.env.DISABLE_LOGGING == "true"
-      sentryDSN      : process.env.SENTRY_DSN
+      octobluRaven   : new OctobluRaven()
 
     @redisUri = process.env.REDIS_URI || 'redis://127.0.0.1:6379'
     @namespace = process.env.NAMESPACE || 'friendly-sharefile'
     @timeoutSeconds = parseInt process.env.TIMEOUT_SECONDS || 20
+
+  handleErrors: =>
+    @serverOptions.octobluRaven.worker().handleErrors()
 
   panic: (error) =>
     console.error error.stack
@@ -39,4 +43,5 @@ class Command
         process.exit 0
 
 command = new Command()
+command.handleErrors()
 command.run()
