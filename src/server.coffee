@@ -4,10 +4,11 @@ express            = require 'express'
 bodyParser         = require 'body-parser'
 errorHandler       = require 'errorhandler'
 OctobluRaven       = require 'octoblu-raven'
-meshbluHealthcheck = require 'express-meshblu-healthcheck'
-meshbluAuth        = require 'express-meshblu-auth'
-MeshbluAuthExpress = require 'express-meshblu-auth/src/meshblu-auth-express'
+sendError          = require 'express-send-error'
 bearerToken        = require 'express-bearer-token'
+meshbluAuth        = require 'express-meshblu-auth'
+meshbluHealthcheck = require 'express-meshblu-healthcheck'
+MeshbluAuthExpress = require 'express-meshblu-auth/src/meshblu-auth-express'
 expressVersion     = require 'express-package-version'
 debug              = require('debug')('friendly-sharefile-service:server')
 Router             = require './router'
@@ -22,9 +23,9 @@ class Server
   run: (callback) =>
     app = express()
     ravenExpress = @octobluRaven.express()
-    app.use ravenExpress.requestHandler()
-    app.use ravenExpress.errorHandler()
-    app.use ravenExpress.sendError()
+    app.use sendError()
+    app.use ravenExpress.meshbluAuthContext()
+    app.use ravenExpress.handleErrors()
     app.use meshbluHealthcheck()
     app.use expressVersion {format: '{"version": "%s"}'}
     app.use morgan 'dev', immediate: false unless @disableLogging

@@ -18,7 +18,7 @@ class Command
     @timeoutSeconds = parseInt process.env.TIMEOUT_SECONDS || 20
 
   handleErrors: =>
-    @serverOptions.octobluRaven.worker().handleErrors()
+    @serverOptions.octobluRaven.patchGlobal()
 
   panic: (error) =>
     console.error error.stack
