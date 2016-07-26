@@ -3,6 +3,7 @@ morgan             = require 'morgan'
 express            = require 'express'
 bodyParser         = require 'body-parser'
 errorHandler       = require 'errorhandler'
+compression        = require 'compression'
 OctobluRaven       = require 'octoblu-raven'
 sendError          = require 'express-send-error'
 bearerToken        = require 'express-bearer-token'
@@ -23,6 +24,7 @@ class Server
   run: (callback) =>
     app = express()
     ravenExpress = @octobluRaven.express()
+    app.use compression()
     app.use sendError()
     app.use ravenExpress.meshbluAuthContext()
     app.use ravenExpress.handleErrors()
