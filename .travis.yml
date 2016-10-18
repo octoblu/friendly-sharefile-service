@@ -1,18 +1,20 @@
 language: node_js
 node_js:
-- '5'
-addons:
-  code_climate:
-    repo_token: 2fb5925189f4c9462ad5011f1a385a2a7bd10a7da2333a52c326f9e3bc7634b1
-before_script:
-- npm install -g codeclimate-test-reporter
-after_script:
-- codeclimate-test-reporter < coverage/lcov.info
+  - '5'
 deploy:
   provider: npm
   email: serveradmin@octoblu.com
   api_key:
-    secure: Gr4n/O7CzszpA1UrbdaRavM/WwfCOIDdUrJtuSqzXwVsOq3e3Bz+Vusoy4kM4KyLM+RzI/R+ptFbiALlw3YA//RBL93kVmKmpPv61KO+jyLCSghnVMKUPwdttrHawt6G0UjSqQmu8SJJN1m6UNmQTQPreEJyHF+xuvVNS0oMYJZ8yCz6zuWblAE+fFzNPhi5SqxO4cUEeTZ8mElYm7WFu1y6QaJXMh3/tUqT5fsbU9vzLlgCbLtD5PMGqLagNhxUPFnBAk+bHCaA4PvAOYdoimbq5FIrIu/XYEJ0ibDvo3XtcW6/A5JwD1X/Avw/ldcOmKnktaJyIFiGLb34GG3HAGgD9f9M6gnx3ZvpNF1k+IprPmxgkU2ZdBrsHq5QVOhn9qM9nh3YFNoVwfYDvhz0W6J9t4xYNfHKbwbXGGEMXnUhz6U/MN50ANm0maIt0nMoHdzMSrYO+2VZX6ys+T24NZJcdyusKOxbnUUlTQot5nmREJqI0wA4iGOZ4O/QuD4ePJKDecj7daKjh9d+2MCLULc0QUrGEPqANk9BN/V7IDjq7X3wz4Gtqg9hMtVDAMZdR4ezZ61irRMP6PYvSkv6dHv5qJZcwecHU7zSx1KhnWgl4I7Ii0FhEkJK1WiZrTdNOaZkzU9INYp12o8AJnASIvVrHeeDyEWv/H89usVdL0c=
-  on:
+    secure: >-
+      Gr4n/O7CzszpA1UrbdaRavM/WwfCOIDdUrJtuSqzXwVsOq3e3Bz+Vusoy4kM4KyLM+RzI/R+ptFbiALlw3YA//RBL93kVmKmpPv61KO+jyLCSghnVMKUPwdttrHawt6G0UjSqQmu8SJJN1m6UNmQTQPreEJyHF+xuvVNS0oMYJZ8yCz6zuWblAE+fFzNPhi5SqxO4cUEeTZ8mElYm7WFu1y6QaJXMh3/tUqT5fsbU9vzLlgCbLtD5PMGqLagNhxUPFnBAk+bHCaA4PvAOYdoimbq5FIrIu/XYEJ0ibDvo3XtcW6/A5JwD1X/Avw/ldcOmKnktaJyIFiGLb34GG3HAGgD9f9M6gnx3ZvpNF1k+IprPmxgkU2ZdBrsHq5QVOhn9qM9nh3YFNoVwfYDvhz0W6J9t4xYNfHKbwbXGGEMXnUhz6U/MN50ANm0maIt0nMoHdzMSrYO+2VZX6ys+T24NZJcdyusKOxbnUUlTQot5nmREJqI0wA4iGOZ4O/QuD4ePJKDecj7daKjh9d+2MCLULc0QUrGEPqANk9BN/V7IDjq7X3wz4Gtqg9hMtVDAMZdR4ezZ61irRMP6PYvSkv6dHv5qJZcwecHU7zSx1KhnWgl4I7Ii0FhEkJK1WiZrTdNOaZkzU9INYp12o8AJnASIvVrHeeDyEWv/H89usVdL0c=
+  'on':
     tags: true
     branches: true
+notifications:
+  webhooks:
+    - 'https://beekeeper.octoblu.com/webhooks/travis:ci'
+after_success:
+  - npm run coverage
+  - 'npm run mocha:json'
+  - 'bash <(curl -s https://codecov.io/bash)'
+  - 'bash <(curl -s https://codecov.octoblu.com/bash)'
