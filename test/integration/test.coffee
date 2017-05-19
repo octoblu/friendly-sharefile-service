@@ -1,6 +1,4 @@
-http    = require 'http'
-request = require 'request'
-shmock  = require '@octoblu/shmock'
+{describe,beforeEach,it,expect,afterEach} = global
 Server  = require '../../src/server'
 
 describe 'Test', ->
@@ -8,7 +6,7 @@ describe 'Test', ->
     serverOptions =
       port: undefined,
       disableLogging: true
-      
+
     @server = new Server serverOptions, {}
 
     @server.run =>
