@@ -1,6 +1,7 @@
 _            = require 'lodash'
-NodeUUID         = require 'uuid'
+NodeUUID     = require 'uuid'
 StatusDevice = require 'friendly-sharefile/src/models/status-device'
+debug        = require('debug')('friendly-sharefile-service:sharefile-service')
 
 class SharefileService
   constructor: ({@token,@sharefileDomain,@jobManager,@meshbluConfig}) ->
@@ -59,7 +60,10 @@ class SharefileService
       body = JSON.parse response.rawData
       callback null, @_createResponse code, body
 
-  uploadFile: ({itemId,path,fileName,title,description}, contents, callback) =>
+  uploadFile: (options, contents, callback) =>
+    debug 'uploadFile options:', JSON.stringify(options,null,2)
+    debug 'uploadFile contents:', JSON.stringify(contents,null,2)
+    {itemId,path,fileName,title,description} = options
     jobType = 'uploadFileById' if itemId?
     jobType = 'uploadFileByPath' if path?
     @_do jobType, {itemId,path,fileName,title,description}, contents, (error, response) =>
@@ -120,7 +124,9 @@ class SharefileService
     metadata.token = @token
     metadata.domain = @sharefileDomain
     metadata.jobType = jobType
-    @jobManager.do 'request', 'response', {metadata,data}, callback
+    message = {metadata,data}
+    debug '_do message:', JSON.stringify(message,null,2)
+    @jobManager.do 'request', 'response', message, callback
 
   _createResponse: (code, body) =>
     return code: code, body: body
