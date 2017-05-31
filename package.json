@@ -1,6 +1,6 @@
 {
   "name": "friendly-sharefile-service",
-  "version": "7.3.5",
+  "version": "7.3.6",
   "description": "Friendly sharefile service",
   "keywords": [],
   "homepage": "https://github.com/octoblu/friendly-sharefile-service",
@@ -45,7 +45,7 @@
     "friendly-sharefile": "^3.5.2",
     "lodash": "^4.13.1",
     "meshblu-config": "^7.0.0",
-    "meshblu-core-job-manager": "^6.1.4",
+    "meshblu-core-job-manager": "^3.2.0",
     "meshblu-http": "^9.9.0",
     "redis": "^2.6.2",
     "sigterm-handler": "^2.0.0",

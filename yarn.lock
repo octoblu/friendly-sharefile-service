@@ -1269,9 +1269,9 @@ meshblu-config@^7.0.0:
     lodash "^3.9.1"
     meshblu-encryption "^2.0.1"
 
-meshblu-core-job-manager@^6.1.4:
-  version "6.2.1"
-  resolved "https://registry.yarnpkg.com/meshblu-core-job-manager/-/meshblu-core-job-manager-6.2.1.tgz#40b7d4220087ecf7af934f535dbf88f5be4d5893"
+meshblu-core-job-manager@^3.2.0:
+  version "3.10.1"
+  resolved "https://registry.yarnpkg.com/meshblu-core-job-manager/-/meshblu-core-job-manager-3.10.1.tgz#650d93ad89797f3619f9d4d61cac0f70a982cbc8"
   dependencies:
     async "^1.5.0"
     debug "^2.2.0"
