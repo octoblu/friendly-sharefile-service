@@ -77,7 +77,7 @@ class SharefileController
 
   uploadFileById: (request, response) =>
     {itemId} = request.params
-    {fileName,title,description,contents} = request.query
+    {fileName,title,description,contents} = request.body
 
     @_getShareFileService(request).uploadFile {itemId,fileName,title,description}, contents, (error, result) =>
       return response.status(error.code || 500).send(error: error.message) if error?
