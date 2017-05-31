@@ -9,6 +9,7 @@ class SharefileService
   getMetadata: ({itemId,path}, callback) =>
     jobType = 'getMetadataById' if itemId?
     jobType = 'getMetadataByPath' if path?
+    return @_createError 422, 'Missing itemId or path' unless jobType?
     @_do jobType, {itemId,path}, {}, (error, response) =>
       return callback @_createError 500, error.message if error?
       {code} = response.metadata
@@ -18,7 +19,7 @@ class SharefileService
   getItem: ({itemId,path}, callback) =>
     jobType = 'getItemById' if itemId?
     jobType = 'getItemByPath' if path?
-
+    return @_createError 422, 'Missing itemId or path' unless jobType?
     @_do jobType, {itemId,path}, {}, (error, response) =>
       return callback @_createError 500, error.message if error?
       {code} = response.metadata
@@ -28,7 +29,7 @@ class SharefileService
   share: ({itemId,path,email,title}, callback) =>
     jobType = 'shareById' if itemId?
     jobType = 'shareByPath' if path?
-
+    return @_createError 422, 'Missing itemId or path' unless jobType?
     @_do jobType, {itemId,path,email,title}, {}, (error, response) =>
       return callback @_createError 500, error.message if error?
       {code} = response.metadata
@@ -45,6 +46,7 @@ class SharefileService
   getTreeView: ({itemId,path}, callback) =>
     jobType = 'getTreeViewById' if itemId?
     jobType = 'getTreeViewByPath' if path?
+    return @_createError 422, 'Missing itemId or path' unless jobType?
     @_do jobType, {itemId,path}, {}, (error, response) =>
       return callback @_createError 500, error.message if error?
       {code} = response.metadata
@@ -54,6 +56,7 @@ class SharefileService
   getChildren: ({itemId,path}, callback) =>
     jobType = 'getChildrenById' if itemId?
     jobType = 'getChildrenByPath' if path?
+    return @_createError 422, 'Missing itemId or path' unless jobType?
     @_do jobType, {itemId,path}, {}, (error, response) =>
       return callback @_createError 500, error.message if error?
       {code} = response.metadata
@@ -66,6 +69,8 @@ class SharefileService
     {itemId,path,fileName,title,description} = options
     jobType = 'uploadFileById' if itemId?
     jobType = 'uploadFileByPath' if path?
+    return @_createError 422, 'Missing itemId or path' unless jobType?
+    return @_createError 422, 'Upload file requires contents in body' unless contents?
     @_do jobType, {itemId,path,fileName,title,description}, contents, (error, response) =>
       return callback @_createError 500, error.message if error?
       {code} = response.metadata
@@ -75,6 +80,7 @@ class SharefileService
   downloadFile: ({itemId,path}, callback) =>
     jobType = 'downloadFileById' if itemId?
     jobType = 'downloadFileByPath' if path?
+    return @_createError 422, 'Missing itemId or path' unless jobType?
     @_do jobType, {itemId,path}, {}, (error, response) =>
       return callback @_createError 500, error.message if error?
       {code} = response.metadata
